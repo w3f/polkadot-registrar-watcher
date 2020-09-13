@@ -2,6 +2,8 @@
 
 # polkadot-watcher-registrar
 
+Work in progress
+
 ## How to Run 
 
 ### Requirements
