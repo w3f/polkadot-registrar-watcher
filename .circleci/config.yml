@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           command: |
-            helm lint ./charts/polkadot-watcher-csv-exporter
+            helm lint ./charts/polkadot-watcher-registrar
 
   yarnLint:
     docker:
@@ -27,7 +27,7 @@ jobs:
       - setup_remote_docker
       - run:
           command: |
-            /scripts/build-image.sh web3f/polkadot-watcher-csv-exporter .
+            /scripts/build-image.sh web3f/polkadot-watcher-registrar .
 
   publishImage:
     docker:
@@ -37,7 +37,7 @@ jobs:
       - setup_remote_docker
       - run:
           command: |
-            /scripts/publish-image.sh web3f/polkadot-watcher-csv-exporter
+            /scripts/publish-image.sh web3f/polkadot-watcher-registrar
 
   publishChart:
     docker:
