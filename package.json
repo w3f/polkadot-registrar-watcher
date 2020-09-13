@@ -1,8 +1,8 @@
 {
-  "name": "polkadot-watcher-csv-exporter",
+  "name": "polkadot-watcher-registrar",
   "version": "0.1.0",
-  "description": "Monitor events on Polkadot networks and export a csv dataset",
-  "repository": "git@github.com:w3f/polkadot-watcher-csv-exporter.git",
+  "description": "Registrar",
+  "repository": "git@github.com:w3f/polkadot-watcher-registrar.git",
   "author": "W3F Infrastructure Team <devops@web3.foundation>",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
