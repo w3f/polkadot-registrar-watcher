@@ -1,0 +1,19 @@
+environment: production
+port: 3000
+
+image:
+  repo: web3f/polkadot-watcher-registrar
+  tag: v0.1.0
+
+config:
+  endpoint: "wss://cc3-3.kusama.network"
+  port: 3000
+  logLevel: info
+    
+resources: 
+  requests:
+    cpu: "100m"
+    memory: "500Mi"
+  limits:
+    cpu: "300m"
+    memory: "1Gi" 

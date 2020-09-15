@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ .Values.image.repo }}:{{ .Values.image.tag }}
+        imagePullPolicy: IfNotPresent
+        args:
+        - -c
+        - /app/config/main.yaml
+        ports:
+        - name: metrics
+          containerPort: {{ .Values.port }}       
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: {{ .Values.port }}
+          initialDelaySeconds: 10
+          timeoutSeconds: 200
+        {{ if ne .Values.environment "ci" }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{ end }}
+        volumeMounts:
+        - name: config
+          mountPath: /app/config 
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }} 
