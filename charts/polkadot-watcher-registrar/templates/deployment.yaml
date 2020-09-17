@@ -42,7 +42,16 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /app/config 
+        {{ if ne .Values.environment "ci" }}    
+        - name: data-requests
+          mountPath: {{ .Values.config.exportDir }}
+        {{ end }}   
       volumes:
       - name: config
         configMap:
           name: {{ .Release.Name }} 
+      {{ if ne .Values.environment "ci" }}       
+      - name: data-requests
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}
+      {{ end }}     
