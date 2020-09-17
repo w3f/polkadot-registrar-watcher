@@ -3,7 +3,7 @@ import { SessionIndex, Registration, IdentityInfo, RegistrationJudgement } from 
 import { Logger } from '@w3f/logger';
 import { Text } from '@polkadot/types/primitive';
 import {
-    InputConfig, JudgementRequest, StorageData, JudgementResult, ChallengeState, WsChallengeRequest
+    InputConfig, JudgementRequest, StorageData, JudgementResult, ChallengeState, WsChallengeRequest, WsChallengeUnrequest
 } from './types';
 import Event from '@polkadot/types/generic/Event';
 import { Option, Vec } from '@polkadot/types'
@@ -11,6 +11,7 @@ import fs from 'fs'
 import storage from 'node-persist';
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
+import { buildWsChallengeRequest, buildWsChallengeUnrequest } from "./utils";
 
 export class Subscriber {
     private chain: Text;
@@ -23,6 +24,7 @@ export class Subscriber {
     private registrarKeyFilePath: string;
     private registrarAccount: KeyringPair;
     private wsNewJudgementRequestHandler: (request: WsChallengeRequest) => void;
+    private wsJudgementUnrequestedHandler: (message: WsChallengeUnrequest) => void;
 
     constructor(
         cfg: InputConfig,
@@ -89,6 +91,10 @@ export class Subscriber {
       this.wsNewJudgementRequestHandler = handler
     }
 
+    public setJudgementUnrequestHandler = (handler: (request: WsChallengeUnrequest) => void ): void => {
+      this.wsJudgementUnrequestedHandler = handler
+    }
+
     private _triggerDebugActions = async (): Promise<void> =>{
       this.logger.debug('debug mode active')
 
@@ -116,15 +122,47 @@ export class Subscriber {
         events.forEach(async (record) => {
           const { event } = record;
           
-          if (this._isJudgementRequestedEvent(event)) {
-            await this._judgementRequestedHandler(event)
-          }
+          await this._handleJudgementEvents(event)
 
-          if (this._isJudgementGivenEvent(event)) {
-            await this._judgementGivendHandler(event)
-          }
         })
       })
+    }
+
+    private _handleJudgementEvents = async (event: Event): Promise<void> => {
+
+      if (this._isJudgementRequestedEvent(event)) {
+        await this._judgementRequestedHandler(event)
+      }
+
+      if (this._isJudgementGivenEvent(event)) {
+        await this._judgementGivendHandler(event)
+      }
+
+      if (this._isJudgementUnrequested(event)) {
+        await this._judgementUnrequestedHandler(event)
+      }
+
+    }
+
+    private _isJudgementUnrequested = (event: Event): boolean => {
+      return event.section == 'identity' && event.method == 'JudgementUnrequested';
+    }
+
+    private _judgementUnrequestedHandler = async (event: Event): Promise<void> => {
+      this.logger.info('New JudgementUnrequested')
+      const request = this._extractJudgementInfoFromEvent(event)
+      if(request.registrarIndex == this.registrarIndex) {
+        this.logger.info(`new judgement given for claimer ${request.accountId}`)
+        this._removeStoredJudgementRequest(request.accountId)
+
+        try {
+          this.wsJudgementUnrequestedHandler(buildWsChallengeUnrequest(request.accountId))
+        } catch (error) {
+          this.logger.error(`problem on notifying the challenger about a ${request.accountId} JudgementUnrequested`)
+          this.logger.error(error)
+        }
+
+      }
     }
 
     private _isJudgementGivenEvent = (event: Event): boolean => {
@@ -150,7 +188,7 @@ export class Subscriber {
       if(request.registrarIndex == this.registrarIndex) {
         this._storeJudgementRequest(request)
         this.logger.info(`new judgement request to handle by registrar with index ${this.registrarIndex}`)
-        this._performNewChallengeAttempt(request.accountId)        
+        this._performNewChallengeAttempt(request.accountId)       
       }
     }
 
@@ -176,7 +214,7 @@ export class Subscriber {
       }
 
       try {
-        this.wsNewJudgementRequestHandler(this._buildWsChallengeRequest(accountId,info))
+        this.wsNewJudgementRequestHandler(buildWsChallengeRequest(accountId,info))
         await this._storeChallenged(accountId)
       } catch (error) {
         this.logger.error(`problem on performing a new challenge for account ${accountId}`)
@@ -199,25 +237,7 @@ export class Subscriber {
       return {accountId,registrarIndex:parseInt(registrarIndex)}
     }
 
-    private _buildWsChallengeRequest = (accountId: string, info: IdentityInfo): WsChallengeRequest => {
-
-      const accounts = {}
-      if(!info.email.isNull && !info.email.isEmpty && !info.email.isNone){
-        accounts['email'] = info.email.value.toHuman()
-      }
-      if(!info.riot.isNull && !info.riot.isEmpty && !info.riot.isNone){
-        accounts['riot'] = info.riot.value.toHuman()
-      }
-
-      const request: WsChallengeRequest = {
-        event: 'newJudgementRequest',
-        data: {
-          address: accountId,
-          accounts: accounts
-        }
-      }
-      return request
-    }
+    
 
     private _storeJudgementRequest = async (request: JudgementRequest): Promise<void> =>{
       const data: StorageData = {

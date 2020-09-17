@@ -66,5 +66,12 @@ export interface WsJudgementResult{
   judgement: string;
 }
 
+export interface WsChallengeUnrequest {
+  event: 'judgementUnrequested';
+  data: {
+    address: string;
+  };
+}
+
 
 
