@@ -56,7 +56,7 @@ export class WsMessageCenter {
       this.logger.debug(event.data.toString())
       const data = JSON.parse(event.data.toString())
 
-      if(!data || data['event'] || data['data']) {
+      if(!data || !data['event'] || !data['data']) {
         this.logger.error('wrong format')
         wsConnection.send(JSON.stringify(wrongFormatMessage as WsErrorMessage))
         return
