@@ -119,8 +119,25 @@ export class Subscriber {
           if (this._isJudgementRequestedEvent(event)) {
             await this._judgementRequestedHandler(event)
           }
+
+          if (this._isJudgementGivenEvent(event)) {
+            await this._judgementGivendHandler(event)
+          }
         })
       })
+    }
+
+    private _isJudgementGivenEvent = (event: Event): boolean => {
+      return event.section == 'identity' && event.method == 'JudgementGiven';
+    }
+
+    private _judgementGivendHandler = async (event: Event): Promise<void> => {
+      this.logger.info('New JudgementGiven')
+      const request = this._extractJudgementInfoFromEvent(event)
+      if(request.registrarIndex == this.registrarIndex) {
+        this.logger.info(`new judgement given for claimer ${request.accountId}`)
+        this._removeStoredJudgementRequest(request.accountId)
+      }
     }
 
     private _isJudgementRequestedEvent = (event: Event): boolean => {
@@ -129,7 +146,7 @@ export class Subscriber {
 
     private _judgementRequestedHandler = async (event: Event): Promise<void> => {
       this.logger.info('New JudgementRequested')
-      const request = this._extractJudgementRequest(event)
+      const request = this._extractJudgementInfoFromEvent(event)
       if(request.registrarIndex == this.registrarIndex) {
         this._storeJudgementRequest(request)
         this.logger.info(`new judgement request to handle by registrar with index ${this.registrarIndex}`)
@@ -175,7 +192,7 @@ export class Subscriber {
       return isCompliant
     }
     
-    private _extractJudgementRequest = (event: Event): JudgementRequest =>{
+    private _extractJudgementInfoFromEvent = (event: Event): JudgementRequest =>{
       const accountId = event.data[0].toString()
       const registrarIndex = event.data[1].toString()
       this.logger.info('AccountId:'+accountId+'\tRegistrarIndex:'+registrarIndex)
@@ -251,7 +268,7 @@ export class Subscriber {
       return await this.api.query.identity.identityOf(accountId)
     }
 
-    private _removeJudgementRequest = async (accountId: string): Promise<void> =>{
+    private _removeStoredJudgementRequest = async (accountId: string): Promise<void> =>{
       await storage.removeItem(accountId)
     }
 
@@ -267,7 +284,6 @@ export class Subscriber {
         else if(judgementResult == JudgementResult.reasonable.toString()){
           await this.triggerExtrinsicReasonable(target)
         }
-        this._removeJudgementRequest(target)
         
       } catch (error) {
         this.logger.error(error)
