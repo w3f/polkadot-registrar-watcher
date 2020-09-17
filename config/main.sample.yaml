@@ -1,3 +1,10 @@
 endpoint: "wss://kusama-rpc.polkadot.io/"
-port: 3000
+nodePort: 3000
+challengerPort: 3001
 logLevel: info
+requestsDir: './data-requests'
+registrarIndex: 3
+
+registrar:
+  keystore:
+    filePath: /Users/ale/Downloads/5GpmfR5PWHX3x1X6wsZhDdpN1F4UKUYPr6mgPZKqLiJRgp5q.json
