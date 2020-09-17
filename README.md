@@ -1,6 +1,6 @@
-[![CircleCI](https://circleci.com/gh/w3f/polkadot-watcher-registrar.svg?style=svg)](https://circleci.com/gh/w3f/polkadot-watcher-registrar)
+[![CircleCI](https://circleci.com/gh/w3f/polkadot-registrar-watcher.svg?style=svg)](https://circleci.com/gh/w3f/polkadot-registrar-watcher)
 
-# polkadot-watcher-registrar
+# polkadot-registrar-watcher
 
 Work in progress
 
@@ -10,8 +10,8 @@ Work in progress
 - yarn: https://classic.yarnpkg.com/en/docs/install/
 
 ```bash
-git clone https://github.com/w3f/polkadot-watcher-registrar.git
-cd polkadot-watcher-registrar
+git clone https://github.com/w3f/polkadot-registrar-watcher.git
+cd polkadot-registrar-watcher
 cp config/main.sample.yaml config/main.yaml 
 #just the fist time
 
