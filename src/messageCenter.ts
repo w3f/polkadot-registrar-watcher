@@ -68,7 +68,7 @@ export class WsMessageCenter {
   }
 
   public newJudgementRequestHandler = (request: WsChallengeRequest): void => {
-    this.logger.info('New Judgement Request to be sent to the challenger app: '+request.toString())
+    this.logger.info('New Judgement Request to be sent to the challenger app: '+JSON.stringify(request))
     this.wsServer.clients.forEach(wsConnection => wsConnection.send( JSON.stringify(request)) )
   }
 }

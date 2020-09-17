@@ -186,10 +186,10 @@ export class Subscriber {
 
       const accounts = {}
       if(!info.email.isNull && !info.email.isEmpty && !info.email.isNone){
-        accounts['email'] = info.email.toString()
+        accounts['email'] = info.email.value.toHuman()
       }
       if(!info.riot.isNull && !info.riot.isEmpty && !info.riot.isNone){
-        accounts['riot'] = info.riot.toString()
+        accounts['riot'] = info.riot.value.toHuman()
       }
 
       const request: WsChallengeRequest = {
