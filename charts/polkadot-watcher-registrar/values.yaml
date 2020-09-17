@@ -7,8 +7,18 @@ image:
 
 config:
   endpoint: "wss://cc3-3.kusama.network"
-  port: 3000
+  nodePort: 3000
+  challengerPort: 3001
   logLevel: info
+  requestsDir: 'app/data-requests'
+  registrarIndex: 3
+  registrar:
+    keystore:
+      filePath: '/app/secret/pk.json'
+  
+secret:
+  registrarPKValue: |
+    {"address":"xxxx","encoding":"xxx","encoded":"xxx","meta":"xxx"}  
     
 resources: 
   requests:

@@ -5,6 +5,11 @@ export interface InputConfig {
     endpoint: string;
     requestsDir: string;
     registrarIndex: number;
+    registrar: {
+      keystore: {
+        filePath: string;
+      };
+    };
 }
 
 export interface JudgementRequest{

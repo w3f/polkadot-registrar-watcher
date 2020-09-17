@@ -9,7 +9,7 @@ import Event from '@polkadot/types/generic/Event';
 import { Option, Vec } from '@polkadot/types'
 import fs from 'fs'
 import storage from 'node-persist';
-import { KeyringPair } from '@polkadot/keyring/types';
+import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
 
 export class Subscriber {
@@ -20,7 +20,7 @@ export class Subscriber {
     private logLevel: string;
     private requestsDir: string;
     private registrarIndex = 3 
-    private readonly REGISTRAR_SEED = 'entire material egg meadow latin bargain dutch coral blood melt acoustic thought' //TODO configurable from file
+    private registrarKeyFilePath: string;
     private registrarAccount: KeyringPair;
     private wsNewJudgementRequestHandler: (request: WsChallengeRequest) => void;
 
@@ -31,6 +31,7 @@ export class Subscriber {
         this.logLevel = cfg.logLevel;
         this.requestsDir = cfg.requestsDir;
         this.registrarIndex = cfg.registrarIndex;
+        this.registrarKeyFilePath = cfg.registrar.keystore.filePath;
     }
 
     public start = async (): Promise<void> => {
@@ -61,7 +62,9 @@ export class Subscriber {
 
     private _initKey = (): void =>{
       const keyring = new Keyring({ type: 'sr25519' });
-      this.registrarAccount = keyring.addFromUri(this.REGISTRAR_SEED)
+      const keyJson = JSON.parse(fs.readFileSync(this.registrarKeyFilePath, { encoding: 'utf-8' })) as KeyringPair$Json;
+      keyring.addFromJson(keyJson)
+      this.logger.debug(`read account with address: ${keyring.pairs[0].toJson().address}`)
     }
 
     private _initInstanceVariables = async (): Promise<void> =>{
