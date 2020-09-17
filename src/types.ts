@@ -34,33 +34,31 @@ export enum JudgementResult{
   reasonable
 } 
 
-export enum WSEventType{
-  newJudgementRequest,
-  judgementResult,
-  WSAck,
-  error
-}
-
 export interface WsAck {
-  event: WSEventType;
+  event: 'ack';
   data: {
     result: string;
   };
 }
 
 export interface WsErrorMessage {
-  event: WSEventType;
+  event: 'error';
   data: {
     error: string;
   };
 }
 
 export interface WsChallengeRequest {
-  event: WSEventType;
+  event: 'newJudgementRequest';
   data: {
     address: string;
     accounts: { matrix?: string; email?: string};
   };
+}
+
+export interface WsChallengeResponse {
+  event: 'judgementResult';
+  data: JudgementResult;
 }
 
 export interface WsJudgementResult{
@@ -68,8 +66,5 @@ export interface WsJudgementResult{
   judgement: string;
 }
 
-export interface WsChallengeResponse {
-  event: WSEventType;
-  data: JudgementResult;
-}
+
 

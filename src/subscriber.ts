@@ -3,7 +3,7 @@ import { SessionIndex, Registration, IdentityInfo, RegistrationJudgement } from 
 import { Logger } from '@w3f/logger';
 import { Text } from '@polkadot/types/primitive';
 import {
-    InputConfig, JudgementRequest, StorageData, JudgementResult, ChallengeState, WsChallengeRequest, WSEventType
+    InputConfig, JudgementRequest, StorageData, JudgementResult, ChallengeState, WsChallengeRequest
 } from './types';
 import Event from '@polkadot/types/generic/Event';
 import { Option, Vec } from '@polkadot/types'
@@ -193,7 +193,7 @@ export class Subscriber {
       }
 
       const request: WsChallengeRequest = {
-        event: WSEventType.newJudgementRequest,
+        event: 'newJudgementRequest',
         data: {
           address: accountId,
           accounts: accounts
