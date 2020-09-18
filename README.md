@@ -2,7 +2,7 @@
 
 # polkadot-registrar-watcher
 
-This application is the watcher module of the polkadot-registrar application.
+This application is the watcher module of the polkadot-registrar application.  
 You can find the challenger module here: https://github.com/w3f/polkadot-registrar-challenger
 
 ## Application Architecture
