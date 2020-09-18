@@ -48,7 +48,7 @@ export class WsMessageCenter {
       }
 
       if(data['event'] == 'pendingJudgementsRequests'){
-        wsConnection.send( JSON.stringify((await this.subscriber.getAllPendingWsChallengeRequests()) as WsPendingChallengesResponse ) ) 
+        wsConnection.send( JSON.stringify((await this.subscriber.getAllOurPendingWsChallengeRequests()) as WsPendingChallengesResponse ) ) 
       }
     }
 

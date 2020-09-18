@@ -10,7 +10,7 @@ import { Option } from '@polkadot/types'
 import fs from 'fs'
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
-import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData } from "./utils";
+import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent } from "./utils";
 
 export class Subscriber {
     private chain: Text;
@@ -103,6 +103,10 @@ export class Subscriber {
         this._identityClearedHandler(event)
       }
 
+      if (isIdentitySetEvent(event)) {
+        this._judgementUpdateHandler(event)
+      }
+
     }
 
     private _handleJudgementEvents = async (event: Event): Promise<void> => {
@@ -133,6 +137,30 @@ export class Subscriber {
         this.logger.error(error)
       }
       
+    }
+
+    private _hasIdentityAlreadyRequestedOurJudgement = async(accountId: string): Promise<boolean> => {
+
+      let result = false
+      
+      const pending = await this.getAllOurPendingWsChallengeRequests()
+      for(const data of pending.data){
+        if(data.address == accountId) {
+          result = true
+          break
+        }
+      }
+
+      return result
+    }
+
+    private _judgementUpdateHandler = async (event: Event): Promise<void> => {
+      const accountId = extractIdentityInfoFromEvent(event)
+      if( await this._hasIdentityAlreadyRequestedOurJudgement(accountId) ) {
+
+        this.logger.info(`New Update Identity Event for ${accountId}`)
+        this._performNewChallengeAttempt(accountId)
+      }
     }
 
     private _judgementUnrequestedHandler = async (event: Event): Promise<void> => {
@@ -167,7 +195,7 @@ export class Subscriber {
       const request = extractJudgementInfoFromEvent(event)
       this.logger.info('AccountId:'+request.accountId+'\tRegistrarIndex:'+request.registrarIndex)
       if(request.registrarIndex == this.registrarIndex) {
-        this.logger.info(`new judgement request to handle by registrar with index ${this.registrarIndex}`)
+        this.logger.info(`event to be handled by registrar with index ${this.registrarIndex}`)
         this._performNewChallengeAttempt(request.accountId)       
       }
     }
@@ -236,7 +264,7 @@ export class Subscriber {
       this.logger.info(`Judgement Submitted with hash ${txHash}`);
     }
 
-    public getAllPendingWsChallengeRequests = async (): Promise<WsPendingChallengesResponse> => {
+    public getAllOurPendingWsChallengeRequests = async (): Promise<WsPendingChallengesResponse> => {
 
       const result: WsPendingChallengesResponse = {
         event: 'pendingJudgementsResponse',

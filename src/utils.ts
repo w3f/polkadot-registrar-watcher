@@ -81,8 +81,11 @@ export const isJudgementGivenEvent = (event: Event): boolean => {
 
 export const isIdentityClearedEvent = (event: Event): boolean => {
   return event.section == 'identity' && (
-    event.method == ' IdentityCleared' || event.method == '  IdentityKilled' || event.method == '  IdentitySet'
-    );
+    event.method == 'IdentityCleared' || event.method == 'IdentityKilled' );
+}
+
+export const isIdentitySetEvent = (event: Event): boolean => {
+  return event.section == 'identity' && event.method == 'IdentitySet'
 }
 
 export const isJudgementsFieldCompliant = (judgements: Vec<RegistrationJudgement>, registrarIndex: number): boolean =>{
