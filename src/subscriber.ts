@@ -39,7 +39,7 @@ export class Subscriber {
         this._initKey()
         await this._initInstanceVariables();
         
-        if(this.logLevel == 'debug') await this._triggerDebugActions()
+        if(this.logLevel == 'debug') this._triggerDebugActions()
 
         await this._handleEventsSubscriptions();
     }
@@ -79,7 +79,7 @@ export class Subscriber {
       this.wsJudgementUnrequestedHandler = handler
     }
 
-    private _triggerDebugActions = async (): Promise<void> =>{
+    private _triggerDebugActions = (): void =>{
       this.logger.debug('debug mode active')
     }
     
