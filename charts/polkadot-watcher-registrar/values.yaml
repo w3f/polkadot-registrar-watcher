@@ -10,7 +10,6 @@ config:
   nodePort: 3000
   challengerPort: 3001
   logLevel: info
-  requestsDir: 'app/data-requests'
   registrarIndex: 3
   registrar:
     keystore:

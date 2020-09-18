@@ -2,7 +2,6 @@ endpoint: "wss://registrar-test-0.w3f.tech"
 nodePort: 3000
 challengerPort: 3001
 logLevel: info
-requestsDir: './data-requests'
 registrarIndex: 0
 
 registrar:

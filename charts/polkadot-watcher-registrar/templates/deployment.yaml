@@ -45,10 +45,6 @@ spec:
         - name: secret
           mountPath: {{ dir .Values.config.registrar.keystore.filePath }}
           readOnly: true    
-        {{ if ne .Values.environment "ci" }}    
-        - name: data-requests
-          mountPath: {{ .Values.config.exportDir }}
-        {{ end }}   
       volumes:
       - name: config
         configMap:
@@ -58,9 +54,4 @@ spec:
           secretName: {{ .Release.Name }}
           items:
           - key: registrar_pk_json
-            path: {{ base .Values.config.registrar.keystore.filePath }}    
-      {{ if ne .Values.environment "ci" }}       
-      - name: data-requests
-        persistentVolumeClaim:
-          claimName: {{ .Release.Name }}
-      {{ end }}     
+            path: {{ base .Values.config.registrar.keystore.filePath }}      
