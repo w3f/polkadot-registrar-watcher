@@ -8,6 +8,7 @@ export interface InputConfig {
     registrar: {
       keystore: {
         filePath: string;
+        passwordFilePath: string;
       };
     };
 }

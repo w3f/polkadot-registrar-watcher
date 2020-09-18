@@ -20,6 +20,7 @@ export class Subscriber {
     private logLevel: string;
     private registrarIndex = 3 
     private registrarKeyFilePath: string;
+    private registrarPasswordFilePath: string;
     private registrarAccount: KeyringPair;
     private wsNewJudgementRequestHandler: (request: WsChallengeRequest) => void;
     private wsJudgementUnrequestedHandler: (message: WsChallengeUnrequest) => void;
@@ -31,6 +32,7 @@ export class Subscriber {
         this.logLevel = cfg.logLevel;
         this.registrarIndex = cfg.registrarIndex;
         this.registrarKeyFilePath = cfg.registrar.keystore.filePath;
+        this.registrarPasswordFilePath = cfg.registrar.keystore.passwordFilePath;
     }
 
     public start = async (): Promise<void> => {
@@ -60,8 +62,12 @@ export class Subscriber {
     private _initKey = (): void =>{
       const keyring = new Keyring({ type: 'sr25519' });
       const keyJson = JSON.parse(fs.readFileSync(this.registrarKeyFilePath, { encoding: 'utf-8' })) as KeyringPair$Json;
-      keyring.addFromJson(keyJson)
+      const passwordContent = fs.readFileSync(this.registrarPasswordFilePath, { encoding: 'utf-8' });
+      this.registrarAccount = keyring.addFromJson(keyJson)
+      this.registrarAccount.decodePkcs8(passwordContent)
+
       this.logger.debug(`read account with address: ${keyring.pairs[0].toJson().address}`)
+      this.logger.debug(`is locked: ${this.registrarAccount.isLocked}`)
     }
 
     private _initInstanceVariables = async (): Promise<void> =>{
@@ -236,12 +242,16 @@ export class Subscriber {
 
       // TODO add a check 
 
+      this.logger.debug('Extrinsic to be handled with values...')
+      this.logger.debug(judgementResult)
+      this.logger.debug(target)
+
       try {
 
-        if(judgementResult == JudgementResult.erroneous.toString()){
+        if(judgementResult == JudgementResult[JudgementResult.erroneous] ){
           await this.triggerExtrinsicErroneous(target)
         }
-        else if(judgementResult == JudgementResult.reasonable.toString()){
+        else if(judgementResult == JudgementResult[JudgementResult.reasonable] ){
           await this.triggerExtrinsicReasonable(target)
         }
         
@@ -252,15 +262,21 @@ export class Subscriber {
     }
 
     public triggerExtrinsicReasonable = async (target: string): Promise<void> => {
-      await this._triggerExtrinsicProvideJudgement(target,{KnownGood: true})
+      await this._triggerExtrinsicProvideJudgement(target,{Reasonable: true})
     }
 
     public triggerExtrinsicErroneous = async (target: string): Promise<void> =>{
       await this._triggerExtrinsicProvideJudgement(target,{Erroneous: true})
     }
 
-    private _triggerExtrinsicProvideJudgement = async (target: string, judgement: {KnownGood: boolean} | {Erroneous: boolean} ): Promise<void> =>{      
-      const txHash = await this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement).signAndSend(this.registrarAccount)
+    private _triggerExtrinsicProvideJudgement = async (target: string, judgement: {Reasonable: boolean} | {Erroneous: boolean} ): Promise<void> =>{      
+      //const txHash = await this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement).signAndSend(this.registrarAccount)
+      this.logger.debug(`account ${JSON.stringify(this.registrarAccount)}`)
+      const extrinsic = this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement)
+      this.logger.debug(`extrinsic ${JSON.stringify(extrinsic)}`)
+      const signed = extrinsic.sign(this.registrarAccount)
+      this.logger.debug(`signed ${JSON.stringify(signed)}`)
+      const txHash = await extrinsic.signAndSend(this.registrarAccount)
       this.logger.info(`Judgement Submitted with hash ${txHash}`);
     }
 

@@ -54,4 +54,6 @@ spec:
           secretName: {{ .Release.Name }}
           items:
           - key: registrar_pk_json
-            path: {{ base .Values.config.registrar.keystore.filePath }}      
+            path: {{ base .Values.config.registrar.keystore.filePath }} 
+          - key: registrar_password
+            path: {{ base .Values.config.registrar.keystore.passwordFilePath }}        

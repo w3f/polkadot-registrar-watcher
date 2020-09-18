@@ -7,3 +7,4 @@ registrarIndex: 0
 registrar:
   keystore:
     filePath: /Users/ale/Downloads/5GpmfR5PWHX3x1X6wsZhDdpN1F4UKUYPr6mgPZKqLiJRgp5q.json
+    passwordFilePath: '/Users/ale/Downloads/password'

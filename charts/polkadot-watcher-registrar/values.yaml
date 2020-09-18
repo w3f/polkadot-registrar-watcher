@@ -14,10 +14,12 @@ config:
   registrar:
     keystore:
       filePath: '/app/secret/pk.json'
+      passwordFilePath: '/app/secret/password'
   
 secret:
+  registrarPasswordValue: xxxxxxx
   registrarPKValue: |
-    {"address":"xxxx","encoding":"xxx","encoded":"xxx","meta":"xxx"}  
+    {"address":"xxxx","encoding":"xxx","encoded":"xxx","meta":"xxx"}   
     
 resources: 
   requests:
