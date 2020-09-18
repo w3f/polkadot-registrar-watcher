@@ -91,6 +91,18 @@ export class Subscriber {
 
     private _triggerDebugActions = async (): Promise<void> =>{
       this.logger.debug('debug mode active')
+      
+      const entries = await this.api.query.identity.identityOf.entries()
+      entries.forEach(([key, exposure]) => {
+        const registration = <Option<Registration>> exposure
+        this.logger.debug(`accountId: ${key.args.map((k) => k.toHuman())}`);
+        this.logger.debug(`\tregistration:, ${registration.unwrap().judgements} `);
+
+        if(isJudgementsFieldCompliant(registration.unwrap().judgements, this.registrarIndex)){
+          const info: IdentityInfo = registration.unwrap().info 
+        }
+
+      });
     }
 
     private _handleNewHeadSubscriptions = async (): Promise<void> =>{
@@ -214,7 +226,7 @@ export class Subscriber {
         return
       }
       
-      if( !isJudgementsFieldCompliant(judgements) ){
+      if( !isJudgementsFieldCompliant(judgements, this.registrarIndex) ){
         this.logger.info(`${accountId} has an invalid identity claim`)
         this.logger.info(`${identity.unwrap().judgements.toString()}`)
         //TODO eventually remove from storage

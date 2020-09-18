@@ -79,10 +79,10 @@ export const isIdentityClearedEvent = (event: Event): boolean => {
     );
 }
 
-export const isJudgementsFieldCompliant = (judgements: Vec<RegistrationJudgement>): boolean =>{
+export const isJudgementsFieldCompliant = (judgements: Vec<RegistrationJudgement>, registrarIndex: number): boolean =>{
   let isCompliant = false
   for (const judgement of judgements) {
-    if(judgement[0].toNumber() == this.registrarIndex) isCompliant = true
+    if(judgement[0].toNumber() == registrarIndex) isCompliant = true
   }
   return isCompliant
 }
