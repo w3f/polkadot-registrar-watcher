@@ -48,12 +48,24 @@ export interface WsErrorMessage {
   };
 }
 
+export interface WsChallengeRequestData {
+  address: string;
+  accounts: { matrix?: string; email?: string};
+}
+
+export interface WsPendingChallengesResponse {
+  event: 'pendingJudgementsResponse';
+  data: Array<WsChallengeRequestData>;
+}
+
+export interface WsPendingChallengesRequest {
+  event: 'pendingJudgementsRequests';
+  data: string;
+}
+
 export interface WsChallengeRequest {
   event: 'newJudgementRequest';
-  data: {
-    address: string;
-    accounts: { matrix?: string; email?: string};
-  };
+  data: WsChallengeRequestData;
 }
 
 export interface WsChallengeResponse {

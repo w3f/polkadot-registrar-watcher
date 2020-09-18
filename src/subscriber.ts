@@ -3,15 +3,14 @@ import { SessionIndex, Registration, IdentityInfo } from '@polkadot/types/interf
 import { Logger } from '@w3f/logger';
 import { Text } from '@polkadot/types/primitive';
 import {
-    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest
+    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse
 } from './types';
 import Event from '@polkadot/types/generic/Event';
 import { Option } from '@polkadot/types'
 import fs from 'fs'
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
-import { initStorage, storeJudgementRequest, storeChallenged, isAccountAlreadyStored, removeStoredJudgementRequest, getToBeChallengedJudgementRequestors } from "./storage";
-import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, initPersistenceDir } from "./utils";
+import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData } from "./utils";
 
 export class Subscriber {
     private chain: Text;
@@ -19,7 +18,6 @@ export class Subscriber {
     private endpoint: string;
     private sessionIndex: SessionIndex;
     private logLevel: string;
-    private requestsDir: string;
     private registrarIndex = 3 
     private registrarKeyFilePath: string;
     private registrarAccount: KeyringPair;
@@ -31,7 +29,6 @@ export class Subscriber {
         private readonly logger: Logger) {
         this.endpoint = cfg.endpoint;
         this.logLevel = cfg.logLevel;
-        this.requestsDir = cfg.requestsDir;
         this.registrarIndex = cfg.registrarIndex;
         this.registrarKeyFilePath = cfg.registrar.keystore.filePath;
     }
@@ -40,12 +37,10 @@ export class Subscriber {
         
         await this._initAPI();
         this._initKey()
-        await this._initPersistence();
         await this._initInstanceVariables();
         
         if(this.logLevel == 'debug') await this._triggerDebugActions()
 
-        false && await this._handleNewHeadSubscriptions(); //No need to perform new challenges out of the event sub for now: DISABLED with false
         await this._handleEventsSubscriptions();
     }
 
@@ -76,11 +71,6 @@ export class Subscriber {
       );
     }
 
-    private _initPersistence = async (): Promise<void> =>{
-      initPersistenceDir(this.requestsDir);
-      await initStorage(this.requestsDir);
-    }
-
     public setNewJudgementRequestHandler = (handler: (request: WsChallengeRequest) => void ): void => {
       this.wsNewJudgementRequestHandler = handler
     }
@@ -91,31 +81,8 @@ export class Subscriber {
 
     private _triggerDebugActions = async (): Promise<void> =>{
       this.logger.debug('debug mode active')
-      
-      const entries = await this.api.query.identity.identityOf.entries()
-      entries.forEach(([key, exposure]) => {
-        const registration = <Option<Registration>> exposure
-        this.logger.debug(`accountId: ${key.args.map((k) => k.toHuman())}`);
-        this.logger.debug(`\tregistration:, ${registration.unwrap().judgements} `);
-
-        if(isJudgementsFieldCompliant(registration.unwrap().judgements, this.registrarIndex)){
-          const info: IdentityInfo = registration.unwrap().info 
-        }
-
-      });
     }
-
-    private _handleNewHeadSubscriptions = async (): Promise<void> =>{
-
-      this.api.rpc.chain.subscribeNewHeads(async (header) => {
-        this.logger.debug(
-          `New header received: ${header}`
-        );
-
-        this._performNewChallengeAttempts()
-      })
-    }
-
+    
     private _handleEventsSubscriptions = async (): Promise<void> => {
       this.api.query.system.events((events) => {
 
@@ -158,16 +125,12 @@ export class Subscriber {
       this.logger.info('Identity Cleared Event Received')
       const accountId = extractIdentityInfoFromEvent(event)
       this.logger.info(`AccountId: ${accountId}`)
-      if(await isAccountAlreadyStored(accountId)){
 
-        await removeStoredJudgementRequest(accountId)
-
-        try {
-          this.wsJudgementUnrequestedHandler(buildWsChallengeUnrequest(accountId))
-        } catch (error) {
-          this.logger.error(`problem on notifying the challenger about the account ${accountId} JudgementUnrequested`)
-          this.logger.error(error)
-        }
+      try {
+        this.wsJudgementUnrequestedHandler(buildWsChallengeUnrequest(accountId))
+      } catch (error) {
+        this.logger.error(`problem on notifying the challenger about the account ${accountId} JudgementUnrequested`)
+        this.logger.error(error)
       }
       
     }
@@ -176,10 +139,8 @@ export class Subscriber {
       this.logger.info('New JudgementUnrequested')
       const request = extractJudgementInfoFromEvent(event)
       this.logger.info('AccountId:'+request.accountId+'\tRegistrarIndex:'+request.registrarIndex)
-      if(request.registrarIndex == this.registrarIndex && await isAccountAlreadyStored(request.accountId)) {
+      if(request.registrarIndex == this.registrarIndex) {
  
-        await removeStoredJudgementRequest(request.accountId)
-
         try {
           this.wsJudgementUnrequestedHandler(buildWsChallengeUnrequest(request.accountId))
         } catch (error) {
@@ -194,10 +155,10 @@ export class Subscriber {
       this.logger.info('New JudgementGiven')
       const request = extractJudgementInfoFromEvent(event)
       this.logger.info('AccountId:'+request.accountId+'\tRegistrarIndex:'+request.registrarIndex)
-      // TODO should we do something particular if the judgement is providede by another requestor?
-      if(request.registrarIndex == this.registrarIndex && await isAccountAlreadyStored(request.accountId)) {
-        this.logger.info(`Removing claimer from the stored handled accounts`)
-        await removeStoredJudgementRequest(request.accountId)
+      // TODO should we do something particular if the judgement is provided by another requestor?
+      if(request.registrarIndex == this.registrarIndex) {
+        this.logger.info(`sending ack to challenger`)
+        //TODO check if it necessary
       }
     }
 
@@ -206,7 +167,6 @@ export class Subscriber {
       const request = extractJudgementInfoFromEvent(event)
       this.logger.info('AccountId:'+request.accountId+'\tRegistrarIndex:'+request.registrarIndex)
       if(request.registrarIndex == this.registrarIndex) {
-        storeJudgementRequest(request)
         this.logger.info(`new judgement request to handle by registrar with index ${this.registrarIndex}`)
         this._performNewChallengeAttempt(request.accountId)       
       }
@@ -227,30 +187,18 @@ export class Subscriber {
       }
       
       if( !isJudgementsFieldCompliant(judgements, this.registrarIndex) ){
-        this.logger.info(`${accountId} has an invalid identity claim`)
+        this.logger.info(`${accountId} has a not interesting identity claim`)
         this.logger.info(`${identity.unwrap().judgements.toString()}`)
-        //TODO eventually remove from storage
         return
       }
 
       try {
         this.wsNewJudgementRequestHandler(buildWsChallengeRequest(accountId,info))
-        await storeChallenged(accountId)
       } catch (error) {
         this.logger.error(`problem on performing a new challenge for account ${accountId}`)
         this.logger.error(error)
       }
-    }
-
-    private _performNewChallengeAttempts = async (): Promise<void> =>{
-      const requestors = await getToBeChallengedJudgementRequestors()
-
-      for (const requestor of requestors) {
-        this._performNewChallengeAttempt(requestor)
-      }
-    }
-
-    
+    }    
 
     private _getIdentity = async (accountId: string): Promise<Option<Registration>> =>{
       return await this.api.query.identity.identityOf(accountId)
@@ -287,5 +235,33 @@ export class Subscriber {
       const txHash = await this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement).signAndSend(this.registrarAccount)
       this.logger.info(`Judgement Submitted with hash ${txHash}`);
     }
+
+    public getAllPendingWsChallengeRequests = async (): Promise<WsPendingChallengesResponse> => {
+
+      const result: WsPendingChallengesResponse = {
+        event: 'pendingJudgementsResponse',
+        data: []
+      }
+
+      const entries = await this.api.query.identity.identityOf.entries()
+
+      entries.forEach(([key, exposure]) => {
+        const registration = exposure as Option<Registration>
+        const accountId = key.args.map((k) => k.toHuman()).toString()
+        const judgements = registration.unwrap().judgements
+        const info = registration.unwrap().info 
+        this.logger.debug(`accountId: ${accountId}`);
+        this.logger.debug(`\tregistration: ${judgements} `);
+        this.logger.debug(`\tinfo: ${info} `);
+
+        if(isJudgementsFieldCompliant(judgements, this.registrarIndex)){
+          result.data.push(buildWsChallengeRequestData(accountId, info))
+        }
+
+      })
+    
+      return result
+
+    } 
 
 }

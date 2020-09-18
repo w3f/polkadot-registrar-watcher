@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import { Logger } from '@w3f/logger';
-import { WsJudgementResult, WsChallengeRequest, WsErrorMessage, InputConfig, WsAck, WsChallengeUnrequest } from './types';
+import { WsJudgementResult, WsChallengeRequest, WsErrorMessage, InputConfig, WsAck, WsChallengeUnrequest, WsPendingChallengesResponse } from './types';
 import { Subscriber } from "./subscriber";
 import { wrongFormatMessage, genericErrorMessage, connectionEstablished } from "./utils";
 
@@ -32,7 +32,7 @@ export class WsMessageCenter {
 
   private _initConnectionHandlers = (wsConnection: WebSocket): void => {
 
-    wsConnection.onmessage = (event): void => {
+    wsConnection.onmessage = async (event): Promise<void> => {
       this.logger.debug(event.data.toString())
       const data = JSON.parse(event.data.toString())
 
@@ -44,7 +44,11 @@ export class WsMessageCenter {
 
       if(data['event'] == 'judgementResult'){
         const judgementResult: WsJudgementResult = data['data']
-        this.subscriber.handleTriggerExtrinsicJudgement(judgementResult.judgement,judgementResult.address)
+        await this.subscriber.handleTriggerExtrinsicJudgement(judgementResult.judgement,judgementResult.address)
+      }
+
+      if(data['event'] == 'pendingJudgementsRequests'){
+        wsConnection.send( JSON.stringify((await this.subscriber.getAllPendingWsChallengeRequests()) as WsPendingChallengesResponse ) ) 
       }
     }
 

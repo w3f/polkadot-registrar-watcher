@@ -1,4 +1,4 @@
-import { WsChallengeUnrequest, WsChallengeRequest, WsErrorMessage, WsAck, JudgementRequest } from "./types"
+import { WsChallengeUnrequest, WsChallengeRequest, WsErrorMessage, WsAck, JudgementRequest, WsChallengeRequestData } from "./types"
 import { IdentityInfo, RegistrationJudgement } from "@polkadot/types/interfaces"
 import Event from '@polkadot/types/generic/Event';
 import { Vec } from "@polkadot/types";
@@ -10,7 +10,7 @@ export const initPersistenceDir = (dir: string): void =>{
   }
 }
 
-export const buildWsChallengeRequest = (accountId: string, info: IdentityInfo): WsChallengeRequest => {
+export const buildWsChallengeRequestData = (accountId: string, info: IdentityInfo): WsChallengeRequestData => {
 
   const accounts = {}
   if(!info.email.isNull && !info.email.isEmpty && !info.email.isNone){
@@ -20,12 +20,18 @@ export const buildWsChallengeRequest = (accountId: string, info: IdentityInfo): 
     accounts['matrix'] = info.riot.value.toHuman()
   }
 
-  const request: WsChallengeRequest = {
-    event: 'newJudgementRequest',
-    data: {
+  const request: WsChallengeRequestData = {
       address: accountId,
       accounts: accounts
-    }
+  }
+  return request
+}
+
+export const buildWsChallengeRequest = (accountId: string, info: IdentityInfo): WsChallengeRequest => {
+
+  const request: WsChallengeRequest = {
+    event: 'newJudgementRequest',
+    data: buildWsChallengeRequestData(accountId,info)
   }
   return request
 }
