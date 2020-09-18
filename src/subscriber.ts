@@ -1,17 +1,17 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { SessionIndex, Registration, IdentityInfo, RegistrationJudgement } from '@polkadot/types/interfaces';
+import { SessionIndex, Registration, IdentityInfo } from '@polkadot/types/interfaces';
 import { Logger } from '@w3f/logger';
 import { Text } from '@polkadot/types/primitive';
 import {
-    InputConfig, JudgementRequest, StorageData, JudgementResult, ChallengeState, WsChallengeRequest, WsChallengeUnrequest
+    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest
 } from './types';
 import Event from '@polkadot/types/generic/Event';
-import { Option, Vec } from '@polkadot/types'
+import { Option } from '@polkadot/types'
 import fs from 'fs'
-import storage from 'node-persist';
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
-import { buildWsChallengeRequest, buildWsChallengeUnrequest } from "./utils";
+import { initStorage, storeJudgementRequest, storeChallenged, isAccountAlreadyStored, removeStoredJudgementRequest, getToBeChallengedJudgementRequestors } from "./storage";
+import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, initPersistenceDir } from "./utils";
 
 export class Subscriber {
     private chain: Text;
@@ -77,14 +77,8 @@ export class Subscriber {
     }
 
     private _initPersistence = async (): Promise<void> =>{
-      this._initPersistenceDir();
-      await storage.init( {dir:this.requestsDir} );
-    }
-
-    private _initPersistenceDir = (): void =>{
-      if (!fs.existsSync(this.requestsDir)) {
-        fs.mkdirSync(this.requestsDir)
-      }
+      initPersistenceDir(this.requestsDir);
+      await initStorage(this.requestsDir);
     }
 
     public setNewJudgementRequestHandler = (handler: (request: WsChallengeRequest) => void ): void => {
@@ -97,12 +91,6 @@ export class Subscriber {
 
     private _triggerDebugActions = async (): Promise<void> =>{
       this.logger.debug('debug mode active')
-
-      let identity = await this._getIdentity('DVZTk1e5J42EW7LWsAFjyGa33KCC4RjfhU3ux8W1C1FYw2f')
-      this.logger.debug('identity:' +identity)
-
-      identity = await this._getIdentity('CoqkA7rw8zp3mzNfRFnrH5z6uuWyxC4YsZRGtrC73RRwYCG')
-      this.logger.debug(identity.isEmpty ? 'true' : 'false')
     }
 
     private _handleNewHeadSubscriptions = async (): Promise<void> =>{
@@ -124,36 +112,61 @@ export class Subscriber {
           
           await this._handleJudgementEvents(event)
 
+          await this._handleIdentityEvents(event)
+
         })
       })
     }
 
+    private _handleIdentityEvents = async (event: Event): Promise<void> => {
+
+      if (isIdentityClearedEvent(event)) {
+        this._identityClearedHandler(event)
+      }
+
+    }
+
     private _handleJudgementEvents = async (event: Event): Promise<void> => {
 
-      if (this._isJudgementRequestedEvent(event)) {
+      if (isJudgementRequestedEvent(event)) {
         await this._judgementRequestedHandler(event)
       }
 
-      if (this._isJudgementGivenEvent(event)) {
+      if (isJudgementGivenEvent(event)) {
         await this._judgementGivendHandler(event)
       }
 
-      if (this._isJudgementUnrequested(event)) {
+      if (isJudgementUnrequested(event)) {
         await this._judgementUnrequestedHandler(event)
       }
 
     }
 
-    private _isJudgementUnrequested = (event: Event): boolean => {
-      return event.section == 'identity' && event.method == 'JudgementUnrequested';
+    private _identityClearedHandler = async (event: Event): Promise<void> => {
+      this.logger.info('Identity Cleared Event Received')
+      const accountId = extractIdentityInfoFromEvent(event)
+      this.logger.info(`AccountId: ${accountId}`)
+      if(await isAccountAlreadyStored(accountId)){
+
+        await removeStoredJudgementRequest(accountId)
+
+        try {
+          this.wsJudgementUnrequestedHandler(buildWsChallengeUnrequest(accountId))
+        } catch (error) {
+          this.logger.error(`problem on notifying the challenger about the account ${accountId} JudgementUnrequested`)
+          this.logger.error(error)
+        }
+      }
+      
     }
 
     private _judgementUnrequestedHandler = async (event: Event): Promise<void> => {
       this.logger.info('New JudgementUnrequested')
-      const request = this._extractJudgementInfoFromEvent(event)
-      if(request.registrarIndex == this.registrarIndex) {
-        this.logger.info(`new judgement given for claimer ${request.accountId}`)
-        this._removeStoredJudgementRequest(request.accountId)
+      const request = extractJudgementInfoFromEvent(event)
+      this.logger.info('AccountId:'+request.accountId+'\tRegistrarIndex:'+request.registrarIndex)
+      if(request.registrarIndex == this.registrarIndex && await isAccountAlreadyStored(request.accountId)) {
+ 
+        await removeStoredJudgementRequest(request.accountId)
 
         try {
           this.wsJudgementUnrequestedHandler(buildWsChallengeUnrequest(request.accountId))
@@ -165,28 +178,23 @@ export class Subscriber {
       }
     }
 
-    private _isJudgementGivenEvent = (event: Event): boolean => {
-      return event.section == 'identity' && event.method == 'JudgementGiven';
-    }
-
     private _judgementGivendHandler = async (event: Event): Promise<void> => {
       this.logger.info('New JudgementGiven')
-      const request = this._extractJudgementInfoFromEvent(event)
-      if(request.registrarIndex == this.registrarIndex) {
-        this.logger.info(`new judgement given for claimer ${request.accountId}`)
-        this._removeStoredJudgementRequest(request.accountId)
+      const request = extractJudgementInfoFromEvent(event)
+      this.logger.info('AccountId:'+request.accountId+'\tRegistrarIndex:'+request.registrarIndex)
+      // TODO should we do something particular if the judgement is providede by another requestor?
+      if(request.registrarIndex == this.registrarIndex && await isAccountAlreadyStored(request.accountId)) {
+        this.logger.info(`Removing claimer from the stored handled accounts`)
+        await removeStoredJudgementRequest(request.accountId)
       }
-    }
-
-    private _isJudgementRequestedEvent = (event: Event): boolean => {
-      return event.section == 'identity' && event.method == 'JudgementRequested';
     }
 
     private _judgementRequestedHandler = async (event: Event): Promise<void> => {
       this.logger.info('New JudgementRequested')
-      const request = this._extractJudgementInfoFromEvent(event)
+      const request = extractJudgementInfoFromEvent(event)
+      this.logger.info('AccountId:'+request.accountId+'\tRegistrarIndex:'+request.registrarIndex)
       if(request.registrarIndex == this.registrarIndex) {
-        this._storeJudgementRequest(request)
+        storeJudgementRequest(request)
         this.logger.info(`new judgement request to handle by registrar with index ${this.registrarIndex}`)
         this._performNewChallengeAttempt(request.accountId)       
       }
@@ -206,7 +214,7 @@ export class Subscriber {
         return
       }
       
-      if( !this._isJudgementsFieldCompliant(judgements) ){
+      if( !isJudgementsFieldCompliant(judgements) ){
         this.logger.info(`${accountId} has an invalid identity claim`)
         this.logger.info(`${identity.unwrap().judgements.toString()}`)
         //TODO eventually remove from storage
@@ -215,81 +223,25 @@ export class Subscriber {
 
       try {
         this.wsNewJudgementRequestHandler(buildWsChallengeRequest(accountId,info))
-        await this._storeChallenged(accountId)
+        await storeChallenged(accountId)
       } catch (error) {
         this.logger.error(`problem on performing a new challenge for account ${accountId}`)
         this.logger.error(error)
       }
     }
 
-    private _isJudgementsFieldCompliant(judgements: Vec<RegistrationJudgement>): boolean{
-      let isCompliant = false
-      for (const judgement of judgements) {
-        if(judgement[0].toNumber() == this.registrarIndex) isCompliant = true
-      }
-      return isCompliant
-    }
-    
-    private _extractJudgementInfoFromEvent = (event: Event): JudgementRequest =>{
-      const accountId = event.data[0].toString()
-      const registrarIndex = event.data[1].toString()
-      this.logger.info('AccountId:'+accountId+'\tRegistrarIndex:'+registrarIndex)
-      return {accountId,registrarIndex:parseInt(registrarIndex)}
-    }
-
-    
-
-    private _storeJudgementRequest = async (request: JudgementRequest): Promise<void> =>{
-      const data: StorageData = {
-        challengeState: ChallengeState.toBeChallenged.toString(),
-        registrarIndex: request.registrarIndex,
-        challengeAttempts: 0,
-        lastChallengeResponse: ''
-      }
-
-      await storage.setItem(request.accountId,data)
-    }
-
-    private _storeChallenged = async (accountId: string): Promise<void> =>{
-      const data: StorageData = await storage.getItem(accountId)
-      data.challengeAttempts = data.challengeAttempts++
-      data.challengeState = ChallengeState.challenged.toString()
-
-      storage.setItem(accountId,data)
-    }
-
     private _performNewChallengeAttempts = async (): Promise<void> =>{
-      const requestors = await this._getToBeChallengedJudgementRequestors()
+      const requestors = await getToBeChallengedJudgementRequestors()
 
       for (const requestor of requestors) {
         this._performNewChallengeAttempt(requestor)
       }
     }
 
-    private _getToBeChallengedJudgementRequestors = async (): Promise<string[]> =>{ 
-      const requestors = await this._getJudgementRequestors()
-      const toBeChallengedRequestors = []
-      for (const requestor of requestors) {
-        const value = this._getJudgementRequestorData(requestor)
-        if(value['challengeState'] == ChallengeState.toBeChallenged.toString()) toBeChallengedRequestors.push(requestor)
-      }
-      return toBeChallengedRequestors
-    }
-
-    private _getJudgementRequestors = async (): Promise<string[]> =>{
-      return await storage.keys()
-    }
-
-    private _getJudgementRequestorData = async (key: string): Promise<StorageData> =>{
-      return await storage.getItem(key)
-    }
+    
 
     private _getIdentity = async (accountId: string): Promise<Option<Registration>> =>{
       return await this.api.query.identity.identityOf(accountId)
-    }
-
-    private _removeStoredJudgementRequest = async (accountId: string): Promise<void> =>{
-      await storage.removeItem(accountId)
     }
 
     public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<void> => {
