@@ -7,11 +7,11 @@ source /scripts/bootstrap-helm.sh
 run_tests() {
     echo Running tests...
 
-    wait_pod_ready polkadot-registrar-watcher
+    wait_pod_ready registrar-watcher
 }
 
 teardown() {
-    helm delete polkadot-registrar-watcher
+    helm delete registrar-watcher
 }
 
 main(){
