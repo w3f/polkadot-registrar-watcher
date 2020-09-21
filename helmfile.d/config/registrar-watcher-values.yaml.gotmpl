@@ -14,7 +14,7 @@ config:
   logLevel: debug
   registrar:
     keystore:
-      filePath: '/app/keystore/wallet/wallet.json'
+      walletFilePath: '/app/keystore/wallet/wallet.json'
       passwordFilePath: '/app/keystore/password/password'
 
 {{- if eq .Environment.Name "production" }}
