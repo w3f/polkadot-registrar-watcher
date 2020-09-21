@@ -68,6 +68,11 @@ export class Subscriber {
 
       this.logger.debug(`read account with address: ${keyring.pairs[0].toJson().address}`)
       this.logger.debug(`is locked: ${this.registrarAccount.isLocked}`)
+
+      if(this.registrarAccount.isLocked){
+        this.logger.error(`problem unlocking the wallet, exiting ...`)
+        process.exit(1)
+      }
     }
 
     private _initInstanceVariables = async (): Promise<void> =>{

@@ -6,3 +6,4 @@ helmfile.d/
 config/
 scripts/
 test/
+assets/
