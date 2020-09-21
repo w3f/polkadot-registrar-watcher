@@ -18,6 +18,7 @@ export class StartAction {
 
     const wsMC = new WsMessageCenter(this.cfg,this.logger,this.subscriber)
     this.subscriber.setNewJudgementRequestHandler(wsMC.newJudgementRequestHandler)
+    this.subscriber.setJudgementUnrequestHandler(wsMC.judgementUnrequestedHandler)
 
     this._initHttpServer()
 
@@ -37,6 +38,6 @@ export class StartAction {
             res.status(200).send('OK!')
         })
 
-    server.listen(this.cfg.nodePort);
+    server.listen(this.cfg.port);
   }
 }

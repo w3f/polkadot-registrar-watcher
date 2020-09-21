@@ -2,7 +2,12 @@
 
 # polkadot-registrar-watcher
 
-Work in progress
+This application is the watcher module of the polkadot-registrar application.  
+You can find the challenger module here: https://github.com/w3f/polkadot-registrar-challenger
+
+## Application Architecture
+
+![architecture](assets/architecture.png)
 
 ## How to Run 
 
@@ -16,5 +21,6 @@ cp config/main.sample.yaml config/main.yaml
 #just the fist time
 
 yarn
+yarn build
 yarn start
 ```

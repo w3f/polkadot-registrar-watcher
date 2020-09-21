@@ -1,13 +1,14 @@
 export interface InputConfig {
     logLevel: string;
-    nodePort: number;
-    challengerPort: number;
+    port: number;
+    portWs: number;
     endpoint: string;
     requestsDir: string;
-    registrarIndex: number;
     registrar: {
+      index: number;
       keystore: {
-        filePath: string;
+        walletFilePath: string;
+        passwordFilePath: string;
       };
     };
 }
@@ -48,12 +49,24 @@ export interface WsErrorMessage {
   };
 }
 
+export interface WsChallengeRequestData {
+  address: string;
+  accounts: { matrix?: string; email?: string};
+}
+
+export interface WsPendingChallengesResponse {
+  event: 'pendingJudgementsResponse';
+  data: Array<WsChallengeRequestData>;
+}
+
+export interface WsPendingChallengesRequest {
+  event: 'pendingJudgementsRequests';
+  data: string;
+}
+
 export interface WsChallengeRequest {
   event: 'newJudgementRequest';
-  data: {
-    address: string;
-    accounts: { matrix?: string; email?: string};
-  };
+  data: WsChallengeRequestData;
 }
 
 export interface WsChallengeResponse {
@@ -64,6 +77,13 @@ export interface WsChallengeResponse {
 export interface WsJudgementResult{
   address: string;
   judgement: string;
+}
+
+export interface WsChallengeUnrequest {
+  event: 'judgementUnrequested';
+  data: {
+    address: string;
+  };
 }
 
 

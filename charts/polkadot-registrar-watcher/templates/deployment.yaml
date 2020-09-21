@@ -28,11 +28,13 @@ spec:
         - /app/config/main.yaml
         ports:
         - name: metrics
-          containerPort: {{ .Values.port }}       
+          containerPort: {{ .Values.config.port }}
+        - name: ws
+          containerPort: {{ .Values.config.portWs }}         
         livenessProbe:
           httpGet:
             path: /healthcheck
-            port: {{ .Values.port }}
+            port: {{ .Values.config.port }}
           initialDelaySeconds: 10
           timeoutSeconds: 200
         {{ if ne .Values.environment "ci" }}
@@ -42,25 +44,25 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /app/config 
-        - name: secret
-          mountPath: {{ dir .Values.config.registrar.keystore.filePath }}
-          readOnly: true    
-        {{ if ne .Values.environment "ci" }}    
-        - name: data-requests
-          mountPath: {{ .Values.config.exportDir }}
-        {{ end }}   
+        - name: secret-wallet
+          mountPath: {{ dir .Values.config.registrar.keystore.walletFilePath }}
+          readOnly: true
+        - name: secret-password
+          mountPath: {{ dir .Values.config.registrar.keystore.passwordFilePath }}
+          readOnly: true      
       volumes:
       - name: config
         configMap:
           name: {{ .Release.Name }} 
-      - name: secret
+      - name: secret-wallet
         secret:
-          secretName: {{ .Release.Name }}
+          secretName: {{ .Release.Name }}-wallet
           items:
-          - key: registrar_pk_json
-            path: {{ base .Values.config.registrar.keystore.filePath }}    
-      {{ if ne .Values.environment "ci" }}       
-      - name: data-requests
-        persistentVolumeClaim:
-          claimName: {{ .Release.Name }}
-      {{ end }}     
+          - key: registrar_wallet_json
+            path: {{ base .Values.config.registrar.keystore.walletFilePath }} 
+      - name: secret-password
+        secret:
+          secretName: {{ .Release.Name }}-password
+          items:
+          - key: registrar_password
+            path: {{ base .Values.config.registrar.keystore.passwordFilePath }}              

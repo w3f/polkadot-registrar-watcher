@@ -1,10 +1,9 @@
-endpoint: "wss://kusama-rpc.polkadot.io/"
-nodePort: 3000
-challengerPort: 3001
+endpoint: "wss://registrar-test-0.w3f.tech"
+port: 3000
+portWs: 3001
 logLevel: info
-requestsDir: './data-requests'
-registrarIndex: 3
-
 registrar:
+  index: 0
   keystore:
-    filePath: /Users/ale/Downloads/5GpmfR5PWHX3x1X6wsZhDdpN1F4UKUYPr6mgPZKqLiJRgp5q.json
+    walletFilePath: /Users/ale/Downloads/5GpmfR5PWHX3x1X6wsZhDdpN1F4UKUYPr6mgPZKqLiJRgp5q.json
+    passwordFilePath: '/Users/ale/Downloads/password'

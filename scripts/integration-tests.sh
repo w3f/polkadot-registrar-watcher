@@ -7,11 +7,11 @@ source /scripts/bootstrap-helm.sh
 run_tests() {
     echo Running tests...
 
-    wait_pod_ready polkadot-watcher-registrar
+    wait_pod_ready registrar-watcher
 }
 
 teardown() {
-    helm delete polkadot-watcher-registrar
+    helm delete registrar-watcher
 }
 
 main(){
@@ -19,11 +19,7 @@ main(){
         trap teardown EXIT
     fi
 
-    /scripts/build-helm.sh \
-        --set environment=ci \
-        --set image.tag="${CIRCLE_SHA1}" \
-        polkadot-watcher-registrar \
-        ./charts/polkadot-watcher-registrar
+    /scripts/build-helmfile.sh
 
     run_tests
 }

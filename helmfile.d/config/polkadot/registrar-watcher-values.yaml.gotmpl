@@ -1,0 +1,9 @@
+config:
+  endpoint: "wss://polkadot-rpc-node-base-services-external-websockets/"
+  registrar:
+    index: 0
+
+secret:
+  registrarPasswordValue: {{ env "REGISTRAR_POLKADOT_PK_PASS" }}
+  registrarPKValue: |
+    {{ env "REGISTRAR_POLKADOT_PK" }}    
