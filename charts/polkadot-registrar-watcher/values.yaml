@@ -1,0 +1,29 @@
+environment: production
+
+image:
+  repo: web3f/polkadot-registrar-watcher
+  tag: v0.1.0
+
+config:
+  endpoint: "wss://kusama-rpc.polkadot.io/"
+  port: 3000
+  portWs: 3001
+  logLevel: info
+  registrar:
+    index: 0
+    keystore:
+      walletFilePath: '/app/keystore/wallet/wallet.json'
+      passwordFilePath: '/app/keystore/password/password'
+  
+secret:
+  registrarPasswordValue: xxxxxxx
+  registrarWalletValue: |
+    {"address":"xxxx","encoding":"xxx","encoded":"xxx","meta":"xxx"}
+    
+resources: 
+  requests:
+    cpu: "300m"
+    memory: "500Mi"
+  limits:
+    cpu: "500m"
+    memory: "700Mi" 

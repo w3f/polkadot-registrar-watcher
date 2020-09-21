@@ -19,7 +19,7 @@ export class Subscriber {
     private sessionIndex: SessionIndex;
     private logLevel: string;
     private registrarIndex = 3 
-    private registrarKeyFilePath: string;
+    private registrarWalletFilePath: string;
     private registrarPasswordFilePath: string;
     private registrarAccount: KeyringPair;
     private wsNewJudgementRequestHandler: (request: WsChallengeRequest) => void;
@@ -30,8 +30,8 @@ export class Subscriber {
         private readonly logger: Logger) {
         this.endpoint = cfg.endpoint;
         this.logLevel = cfg.logLevel;
-        this.registrarIndex = cfg.registrarIndex;
-        this.registrarKeyFilePath = cfg.registrar.keystore.filePath;
+        this.registrarIndex = cfg.registrar.index;
+        this.registrarWalletFilePath = cfg.registrar.keystore.walletFilePath;
         this.registrarPasswordFilePath = cfg.registrar.keystore.passwordFilePath;
     }
 
@@ -61,7 +61,7 @@ export class Subscriber {
 
     private _initKey = (): void =>{
       const keyring = new Keyring({ type: 'sr25519' });
-      const keyJson = JSON.parse(fs.readFileSync(this.registrarKeyFilePath, { encoding: 'utf-8' })) as KeyringPair$Json;
+      const keyJson = JSON.parse(fs.readFileSync(this.registrarWalletFilePath, { encoding: 'utf-8' })) as KeyringPair$Json;
       const passwordContent = fs.readFileSync(this.registrarPasswordFilePath, { encoding: 'utf-8' });
       this.registrarAccount = keyring.addFromJson(keyJson)
       this.registrarAccount.decodePkcs8(passwordContent)

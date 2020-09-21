@@ -1,13 +1,13 @@
 export interface InputConfig {
     logLevel: string;
-    nodePort: number;
-    challengerPort: number;
+    port: number;
+    portWs: number;
     endpoint: string;
     requestsDir: string;
-    registrarIndex: number;
     registrar: {
+      index: number;
       keystore: {
-        filePath: string;
+        walletFilePath: string;
         passwordFilePath: string;
       };
     };

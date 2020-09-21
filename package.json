@@ -1,8 +1,8 @@
 {
-  "name": "polkadot-watcher-registrar",
+  "name": "polkadot-registrar-watcher",
   "version": "0.1.0",
   "description": "Registrar",
-  "repository": "git@github.com:w3f/polkadot-watcher-registrar.git",
+  "repository": "git@github.com:w3f/polkadot-registrar-watcher.git",
   "author": "W3F Infrastructure Team <devops@web3.foundation>",
   "license": "Apache-2.0",
   "main": "./dist/index.js",

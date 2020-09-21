@@ -38,6 +38,6 @@ export class StartAction {
             res.status(200).send('OK!')
         })
 
-    server.listen(this.cfg.nodePort);
+    server.listen(this.cfg.port);
   }
 }

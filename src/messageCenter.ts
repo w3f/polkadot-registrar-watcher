@@ -10,7 +10,7 @@ export class WsMessageCenter {
 
   constructor(cfg: InputConfig,readonly logger: Logger, subscriber: Subscriber) {
     this.setSubscriber(subscriber)
-    this.wsServer = new WebSocket.Server({ port: cfg.challengerPort });
+    this.wsServer = new WebSocket.Server({ port: cfg.portWs });
 
     this.initServer()
   }
