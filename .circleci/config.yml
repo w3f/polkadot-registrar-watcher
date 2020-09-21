@@ -57,7 +57,19 @@ jobs:
       - run:
           description: run integration tests
           command: |
-            /scripts/integration-tests.sh          
+            /scripts/integration-tests.sh     
+            
+  deploy:
+      docker:
+        - image: web3f/ci-commons:v2.4.0
+      steps:
+        - checkout
+        - run:
+            environment:
+              GCP_REGION: europe-west3
+              HELM_ENV: production
+            command: |
+              /scripts/deploy.sh -c engineering          
 
 workflows:
   version: 2
@@ -106,3 +118,15 @@ workflows:
           requires:
             - buildImage
             - integrationTests
+      - deploy:
+          context: 
+            - engineering-access
+            - registrars-wallets
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+          requires:
+            - publishImage
+            - publishChart      
