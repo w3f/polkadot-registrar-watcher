@@ -1,0 +1,9 @@
+config:
+  endpoint: "wss://registrar-test-0.w3f.tech"
+  registrar:
+    index: 0
+
+secret:
+  registrarPasswordValue: {{ env "REGISTRAR_TEST_PASS" }}
+  registrarPKValue: |
+    {{ env "REGISTRAR_TEST_WALLET" }}    
