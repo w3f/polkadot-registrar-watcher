@@ -67,6 +67,13 @@ export const connectionEstablished: WsAck = {
   }
 }
 
+export const messagAcknowledged: WsAck = {
+  event:'ack',
+  data:{
+    result: 'message acknowledged'
+  }
+}
+
 export const isJudgementUnrequested = (event: Event): boolean => {
   return event.section == 'identity' && event.method == 'JudgementUnrequested';
 }

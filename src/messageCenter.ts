@@ -2,7 +2,7 @@ import WebSocket from "ws";
 import { Logger } from '@w3f/logger';
 import { WsJudgementResult, WsChallengeRequest, WsErrorMessage, InputConfig, WsAck, WsChallengeUnrequest, WsPendingChallengesResponse } from './types';
 import { Subscriber } from "./subscriber";
-import { wrongFormatMessage, genericErrorMessage, connectionEstablished } from "./utils";
+import { wrongFormatMessage, genericErrorMessage, connectionEstablished, messagAcknowledged } from "./utils";
 
 export class WsMessageCenter {
   private wsServer: WebSocket.Server
@@ -41,6 +41,7 @@ export class WsMessageCenter {
         wsConnection.send(JSON.stringify(wrongFormatMessage as WsErrorMessage))
         return
       }
+      wsConnection.send(JSON.stringify(messagAcknowledged as WsAck))
 
       if(data['event'] == 'judgementResult'){
         const judgementResult: WsJudgementResult = data['data']
