@@ -321,7 +321,7 @@ export class Subscriber {
 
       const {data} = await this.getAllOurPendingWsChallengeRequests()
       for (const request of data) {
-        if(request.address == acountId){
+        if(request.address.trim() == acountId.trim()){
           result = true
           break
         }
