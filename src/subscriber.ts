@@ -245,8 +245,11 @@ export class Subscriber {
 
     public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<void> => {
 
-      // TODO add a check 
-
+      if( ! await this._isAccountIdWaitingOurJudgement(target) ){
+        this.logger.info(`the account id ${target} is not present in the pending judgment request set for our registrar...`)
+        return
+      }
+      
       this.logger.debug('Extrinsic to be handled with values...')
       this.logger.debug(judgementResult)
       this.logger.debug(target)
@@ -312,5 +315,19 @@ export class Subscriber {
       return result
 
     } 
+
+    private _isAccountIdWaitingOurJudgement = async(acountId: string): Promise<boolean> => {
+      let result = false
+
+      const {data} = await this.getAllOurPendingWsChallengeRequests()
+      for (const request of data) {
+        if(request.address == acountId){
+          result = true
+          break
+        }
+      }
+
+      return result
+    }
 
 }
