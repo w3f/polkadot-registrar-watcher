@@ -19,6 +19,9 @@ export const buildWsChallengeRequestData = (accountId: string, info: IdentityInf
   if(!info.riot.isNull && !info.riot.isEmpty && !info.riot.isNone){
     accounts['matrix'] = info.riot.value.toHuman()
   }
+  if(!info.riot.isNull && !info.riot.isEmpty && !info.riot.isNone){
+    accounts['twitter'] = info.twitter.value.toHuman()
+  }
 
   const request: WsChallengeRequestData = {
       address: accountId,
