@@ -51,7 +51,7 @@ export interface WsErrorMessage {
 
 export interface WsChallengeRequestData {
   address: string;
-  accounts: { matrix?: string; email?: string; twitter?: string };
+  accounts: { matrix?: string; email?: string; twitter?: string; legal_name?: string };
 }
 
 export interface WsPendingChallengesResponse {
