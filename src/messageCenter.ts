@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import { Logger } from '@w3f/logger';
-import { WsJudgementResult, WsChallengeRequest, WsErrorMessage, InputConfig, WsAck, WsChallengeUnrequest, WsPendingChallengesResponse } from './types';
+import { WsJudgementResult, WsChallengeRequest, WsErrorMessage, InputConfig, WsAck, WsChallengeUnrequest } from './types';
 import { Subscriber } from "./subscriber";
 import { wrongFormatMessage, genericErrorMessage, connectionEstablished, messagAcknowledged } from "./utils";
 
@@ -42,7 +42,7 @@ export class WsMessageCenter {
         wsConnection.send(JSON.stringify(wrongFormatMessage as WsErrorMessage))
         return
       }
-      
+
       if(data['event'] != 'ack'){
         wsConnection.send(JSON.stringify(messagAcknowledged as WsAck))
       }
