@@ -36,7 +36,7 @@ export class WsMessageCenter {
       this.logger.debug(event.data.toString())
       const data = JSON.parse(event.data.toString())
 
-      if(!data || !data['event'] || !data['data']) {
+      if(!data || !data['event']) {
         this.logger.error('wrong format')
         wsConnection.send(JSON.stringify(wrongFormatMessage as WsErrorMessage))
         return
@@ -48,7 +48,7 @@ export class WsMessageCenter {
         await this.subscriber.handleTriggerExtrinsicJudgement(judgementResult.judgement,judgementResult.address)
       }
 
-      if(data['event'] == 'pendingJudgementsRequests'){
+      if(data['event'] == 'pendingJudgementsRequest'){
         wsConnection.send( JSON.stringify((await this.subscriber.getAllOurPendingWsChallengeRequests()) as WsPendingChallengesResponse ) ) 
       }
     }

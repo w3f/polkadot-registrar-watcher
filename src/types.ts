@@ -60,8 +60,7 @@ export interface WsPendingChallengesResponse {
 }
 
 export interface WsPendingChallengesRequest {
-  event: 'pendingJudgementsRequests';
-  data: string;
+  event: 'pendingJudgementsRequest';
 }
 
 export interface WsChallengeRequest {
