@@ -33,6 +33,7 @@ export class WsMessageCenter {
   private _initConnectionHandlers = (wsConnection: WebSocket): void => {
 
     wsConnection.onmessage = async (event): Promise<void> => {
+      this.logger.debug(`new message received:`)
       this.logger.debug(event.data.toString())
       const data = JSON.parse(event.data.toString())
 
@@ -41,7 +42,10 @@ export class WsMessageCenter {
         wsConnection.send(JSON.stringify(wrongFormatMessage as WsErrorMessage))
         return
       }
-      wsConnection.send(JSON.stringify(messagAcknowledged as WsAck))
+      
+      if(data['event'] != 'ack'){
+        wsConnection.send(JSON.stringify(messagAcknowledged as WsAck))
+      }
 
       if(data['event'] == 'judgementResult'){
         const judgementResult: WsJudgementResult = data['data']
@@ -49,7 +53,9 @@ export class WsMessageCenter {
       }
 
       if(data['event'] == 'pendingJudgementsRequest'){
-        wsConnection.send( JSON.stringify((await this.subscriber.getAllOurPendingWsChallengeRequests()) as WsPendingChallengesResponse ) ) 
+        const response = await this.subscriber.getAllOurPendingWsChallengeRequests()
+        this.logger.info('WsPendingChallengesResponse to be sent to the challenger app: '+JSON.stringify(response))
+        wsConnection.send( JSON.stringify(response) ) 
       }
     }
 

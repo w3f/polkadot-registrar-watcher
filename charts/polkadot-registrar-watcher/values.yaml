@@ -2,7 +2,7 @@ environment: production
 
 image:
   repo: web3f/polkadot-registrar-watcher
-  tag: v0.1.8
+  tag: v0.1.9
 
 config:
   endpoint: "wss://kusama-rpc.polkadot.io/"
