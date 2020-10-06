@@ -2,10 +2,12 @@ environment: production
 
 image:
   repo: web3f/polkadot-registrar-watcher
-  tag: v0.1.10
+  tag: v0.1.11
 
 config:
-  endpoint: "wss://kusama-rpc.polkadot.io/"
+  node:
+    enabled: true
+    endpoint: "wss://kusama-rpc.polkadot.io/"
   port: 3000
   portWs: 3001
   logLevel: info

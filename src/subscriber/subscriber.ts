@@ -4,15 +4,16 @@ import { Logger } from '@w3f/logger';
 import { Text } from '@polkadot/types/primitive';
 import {
     InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse
-} from './types';
+} from '../types';
 import Event from '@polkadot/types/generic/Event';
 import { Option } from '@polkadot/types'
 import fs from 'fs'
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
-import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent } from "./utils";
+import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent } from "../utils";
+import { ISubscriber } from './ISubscriber'
 
-export class Subscriber {
+export class Subscriber implements ISubscriber {
     private chain: Text;
     private api: ApiPromise;
     private endpoint: string;
@@ -28,7 +29,7 @@ export class Subscriber {
     constructor(
         cfg: InputConfig,
         private readonly logger: Logger) {
-        this.endpoint = cfg.endpoint;
+        this.endpoint = cfg.node.endpoint;
         this.logLevel = cfg.logLevel;
         this.registrarIndex = cfg.registrar.index;
         this.registrarWalletFilePath = cfg.registrar.keystore.walletFilePath;

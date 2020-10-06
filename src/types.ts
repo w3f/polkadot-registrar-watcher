@@ -2,7 +2,7 @@ export interface InputConfig {
     logLevel: string;
     port: number;
     portWs: number;
-    endpoint: string;
+    node: NodeConfig;
     requestsDir: string;
     registrar: {
       index: number;
@@ -11,6 +11,11 @@ export interface InputConfig {
         passwordFilePath: string;
       };
     };
+}
+
+interface NodeConfig {
+  enabled: boolean;
+  endpoint: string;
 }
 
 export interface JudgementRequest{

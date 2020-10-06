@@ -1,21 +1,21 @@
 import WebSocket from "ws";
 import { Logger } from '@w3f/logger';
 import { WsJudgementResult, WsChallengeRequest, WsErrorMessage, InputConfig, WsAck, WsChallengeUnrequest } from './types';
-import { Subscriber } from "./subscriber";
 import { wrongFormatMessage, genericErrorMessage, connectionEstablished, messagAcknowledged } from "./utils";
+import { ISubscriber } from "./subscriber/ISubscriber";
 
 export class WsMessageCenter {
   private wsServer: WebSocket.Server
-  private subscriber: Subscriber
+  private subscriber: ISubscriber
 
-  constructor(cfg: InputConfig,readonly logger: Logger, subscriber: Subscriber) {
+  constructor(cfg: InputConfig,readonly logger: Logger, subscriber: ISubscriber) {
     this.setSubscriber(subscriber)
     this.wsServer = new WebSocket.Server({ port: cfg.portWs });
 
     this.initServer()
   }
 
-  public setSubscriber = (subscriber: Subscriber): void => {
+  public setSubscriber = (subscriber: ISubscriber): void => {
     this.subscriber = subscriber
   }
 

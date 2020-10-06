@@ -1,13 +1,14 @@
 import express from 'express';
 import { createLogger, Logger } from '@w3f/logger';
 import { Config } from '@w3f/config';
-import { Subscriber } from '../subscriber';
 import { InputConfig } from '../types';
 import { WsMessageCenter } from "../messageCenter";
+import { SubscriberFactory } from '../subscriber/subscriberFactory';
+import { ISubscriber } from '../subscriber/ISubscriber';
 
 export class StartAction {
   private cfg: InputConfig;
-  private subscriber: Subscriber;
+  private subscriber: ISubscriber;
   private logger: Logger;
 
   public execute = async (cmd: { config: string }): Promise<void> => {
@@ -27,7 +28,7 @@ export class StartAction {
   _initInstanceVariables = (cmd: { config: string }): void => {
     this.cfg = new Config<InputConfig>().parse(cmd.config);
     this.logger = createLogger(this.cfg.logLevel);
-    this.subscriber = new Subscriber(this.cfg,this.logger);
+    this.subscriber = new SubscriberFactory(this.cfg,this.logger).makeSubscriber()
   }
 
   _initHttpServer = (): void => {
