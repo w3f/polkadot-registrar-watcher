@@ -222,7 +222,6 @@ export class Subscriber implements ISubscriber {
 
       if( identity.isEmpty ) {
         this.logger.info(`${accountId} has no active identity claims`)
-        //TODO eventually remove from storage
         return
       }
       

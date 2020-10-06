@@ -101,22 +101,22 @@ export const isIdentitySetEvent = (event: Event): boolean => {
   return event.section == 'identity' && event.method == 'IdentitySet'
 }
 
+const _isAlreadyJudged = (judgement: RegistrationJudgement): boolean => {
+  if(!judgement[1]) return false
+  return judgement[1].isErroneous || judgement[1].isReasonable || judgement[1].isKnownGood || judgement[1].isLowQuality || judgement[1].isOutOfDate
+}
+
+const _isOurRegistrarTargetted = (judgement: RegistrationJudgement, registrarIndex: number): boolean => {
+  if(!judgement[0]) return false
+  return judgement[0].toNumber() == registrarIndex
+}
+
 export const isJudgementsFieldCompliant = (judgements: Vec<RegistrationJudgement>, registrarIndex: number): boolean =>{
   let isCompliant = false
   for (const judgement of judgements) {
     if(_isOurRegistrarTargetted(judgement,registrarIndex) && !_isAlreadyJudged(judgement)) isCompliant = true // add a further check here, it has not to be 
   }
   return isCompliant
-}
-
-const _isAlreadyJudged = (judgement: RegistrationJudgement) => {
-  if(!judgement[1]) return false
-  return judgement[1].isErroneous || judgement[1].isReasonable || judgement[1].isKnownGood || judgement[1].isLowQuality || judgement[1].isOutOfDate
-}
-
-const _isOurRegistrarTargetted = (judgement: RegistrationJudgement, registrarIndex: number) : boolean => {
-  if(!judgement[0]) return false
-  return judgement[0].toNumber() == registrarIndex
 }
 
 export const extractJudgementInfoFromEvent = (event: Event): JudgementRequest =>{
