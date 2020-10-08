@@ -243,7 +243,7 @@ export class Subscriber implements ISubscriber {
       return await this.api.query.identity.identityOf(accountId)
     }
 
-    public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<void> => {
+    public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<boolean> => {
 
       if( ! await this._isAccountIdWaitingOurJudgement(target) ){
         this.logger.info(`the account id ${target} is not present in the pending judgment request set for our registrar...`)
@@ -262,9 +262,15 @@ export class Subscriber implements ISubscriber {
         else if(judgementResult == JudgementResult[JudgementResult.reasonable] ){
           await this.triggerExtrinsicReasonable(target)
         }
+
+        // TODO improve the check.
+        // Now it is checking only the fact the transaction has been successfully transmitted
+        // we should check even the esit of this transaction, either subscribing to the transaction result itself or to the event that it will be generated
+        return true
         
       } catch (error) {
         this.logger.error(error)
+        return false
       }
       
     }

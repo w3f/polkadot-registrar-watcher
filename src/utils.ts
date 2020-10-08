@@ -80,6 +80,16 @@ export const messagAcknowledged: WsAck = {
   }
 }
 
+export const buildExtrinsicSuccessAck = (accountId: string): WsAck =>{
+  return {
+    event:'ack',
+    data:{
+      address: accountId,
+      result: 'extrinsic phase ack success'
+    }
+  }
+}
+
 export const isJudgementUnrequested = (event: Event): boolean => {
   return event.section == 'identity' && event.method == 'JudgementUnrequested';
 }

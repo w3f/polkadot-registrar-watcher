@@ -7,5 +7,5 @@ export interface ISubscriber{
   setNewJudgementRequestHandler(handler: (request: WsChallengeRequest) => void ): void;
   setJudgementUnrequestHandler(handler: (request: WsChallengeUnrequest) => void ): void;
   getAllOurPendingWsChallengeRequests(): Promise<WsPendingChallengesResponse>;
-  handleTriggerExtrinsicJudgement(result: string,address: string): Promise<void>;
+  handleTriggerExtrinsicJudgement(result: string,address: string): Promise<boolean>;
 }

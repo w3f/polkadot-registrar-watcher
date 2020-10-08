@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { Logger } from '@w3f/logger';
 import { WsJudgementResult, WsChallengeRequest, WsErrorMessage, InputConfig, WsAck, WsChallengeUnrequest } from './types';
-import { wrongFormatMessage, genericErrorMessage, connectionEstablished, messagAcknowledged } from "./utils";
+import { wrongFormatMessage, genericErrorMessage, connectionEstablished, messagAcknowledged, buildExtrinsicSuccessAck } from "./utils";
 import { ISubscriber } from "./subscriber/ISubscriber";
 
 export class WsMessageCenter {
@@ -49,7 +49,8 @@ export class WsMessageCenter {
 
       if(data['event'] == 'judgementResult'){
         const judgementResult: WsJudgementResult = data['data']
-        await this.subscriber.handleTriggerExtrinsicJudgement(judgementResult.judgement,judgementResult.address)
+        const isSuccess = await this.subscriber.handleTriggerExtrinsicJudgement(judgementResult.judgement,judgementResult.address)
+        isSuccess && wsConnection.send(JSON.stringify(buildExtrinsicSuccessAck(judgementResult.address)))
       }
 
       if(data['event'] == 'pendingJudgementsRequest'){

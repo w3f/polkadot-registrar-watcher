@@ -20,6 +20,6 @@ export class SubscriberMock implements ISubscriber {
     return result
   }
 
-  public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<void> => {}
+  public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<boolean> => { return false }
 
 }
