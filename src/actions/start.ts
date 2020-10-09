@@ -17,9 +17,8 @@ export class StartAction {
 
     await this.subscriber.start();
 
-    const wsMC = new WsMessageCenter(this.cfg,this.logger,this.subscriber)
-    this.subscriber.setNewJudgementRequestHandler(wsMC.newJudgementRequestHandler)
-    this.subscriber.setJudgementUnrequestHandler(wsMC.judgementUnrequestedHandler)
+    const wsMC = new WsMessageCenter(this.cfg,this.subscriber,this.logger)
+    this._setSubscriberHandlers(this.subscriber, wsMC)
 
     this._initHttpServer()
 
@@ -29,6 +28,12 @@ export class StartAction {
     this.cfg = new Config<InputConfig>().parse(cmd.config);
     this.logger = createLogger(this.cfg.logLevel);
     this.subscriber = new SubscriberFactory(this.cfg,this.logger).makeSubscriber()
+  }
+
+  _setSubscriberHandlers = (subscriber: ISubscriber, messageCenter: WsMessageCenter): void => {
+    subscriber.setNewJudgementRequestHandler(messageCenter.newJudgementRequestHandler)
+    subscriber.setJudgementUnrequestHandler(messageCenter.judgementUnrequestedHandler)
+    subscriber.setJudgementGivenHandler(messageCenter.judgementGivenHandler)
   }
 
   _initHttpServer = (): void => {

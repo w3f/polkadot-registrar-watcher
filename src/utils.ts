@@ -80,12 +80,12 @@ export const messagAcknowledged: WsAck = {
   }
 }
 
-export const buildExtrinsicSuccessAck = (accountId: string): WsAck =>{
+export const buildJudgementGivenAck = (accountId: string): WsAck =>{
   return {
     event:'ack',
     data:{
       address: accountId,
-      result: 'extrinsic phase ack success'
+      result: 'judgement given'
     }
   }
 }
