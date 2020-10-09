@@ -80,6 +80,16 @@ export const messagAcknowledged: WsAck = {
   }
 }
 
+export const buildJudgementGivenAck = (accountId: string): WsAck =>{
+  return {
+    event:'ack',
+    data:{
+      address: accountId,
+      result: 'judgement given'
+    }
+  }
+}
+
 export const isJudgementUnrequested = (event: Event): boolean => {
   return event.section == 'identity' && event.method == 'JudgementUnrequested';
 }

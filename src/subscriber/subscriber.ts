@@ -3,14 +3,14 @@ import { SessionIndex, Registration, IdentityInfo } from '@polkadot/types/interf
 import { Logger } from '@w3f/logger';
 import { Text } from '@polkadot/types/primitive';
 import {
-    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse
+    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck
 } from '../types';
 import Event from '@polkadot/types/generic/Event';
 import { Option } from '@polkadot/types'
 import fs from 'fs'
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
-import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent } from "../utils";
+import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent, buildJudgementGivenAck } from "../utils";
 import { ISubscriber } from './ISubscriber'
 
 export class Subscriber implements ISubscriber {
@@ -25,6 +25,7 @@ export class Subscriber implements ISubscriber {
     private registrarAccount: KeyringPair;
     private wsNewJudgementRequestHandler: (request: WsChallengeRequest) => void;
     private wsJudgementUnrequestedHandler: (message: WsChallengeUnrequest) => void;
+    private wsJudgementGievenHandler: (message: WsAck) => void;
 
     constructor(
         cfg: InputConfig,
@@ -89,6 +90,10 @@ export class Subscriber implements ISubscriber {
 
     public setJudgementUnrequestHandler = (handler: (request: WsChallengeUnrequest) => void ): void => {
       this.wsJudgementUnrequestedHandler = handler
+    }
+
+    public setJudgementGivenHandler = (handler: (request: WsAck) => void ): void => {
+      this.wsJudgementGievenHandler = handler
     }
 
     private _triggerDebugActions = (): void =>{
@@ -198,7 +203,7 @@ export class Subscriber implements ISubscriber {
       // TODO should we do something particular if the judgement is provided by another requestor?
       if(request.registrarIndex == this.registrarIndex) {
         this.logger.info(`sending ack to challenger`)
-        //TODO check if it necessary
+        this.wsJudgementGievenHandler(buildJudgementGivenAck(request.accountId))
       }
     }
 
@@ -243,7 +248,7 @@ export class Subscriber implements ISubscriber {
       return await this.api.query.identity.identityOf(accountId)
     }
 
-    public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<void> => {
+    public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<boolean> => {
 
       if( ! await this._isAccountIdWaitingOurJudgement(target) ){
         this.logger.info(`the account id ${target} is not present in the pending judgment request set for our registrar...`)
@@ -262,9 +267,13 @@ export class Subscriber implements ISubscriber {
         else if(judgementResult == JudgementResult[JudgementResult.reasonable] ){
           await this.triggerExtrinsicReasonable(target)
         }
+
+        // the transaction has been successfully transmitted
+        return true
         
       } catch (error) {
         this.logger.error(error)
+        return false
       }
       
     }

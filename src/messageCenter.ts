@@ -6,19 +6,13 @@ import { ISubscriber } from "./subscriber/ISubscriber";
 
 export class WsMessageCenter {
   private wsServer: WebSocket.Server
-  private subscriber: ISubscriber
 
-  constructor(cfg: InputConfig,readonly logger: Logger, subscriber: ISubscriber) {
-    this.setSubscriber(subscriber)
+  constructor(cfg: InputConfig, readonly subscriber: ISubscriber, readonly logger: Logger) {
     this.wsServer = new WebSocket.Server({ port: cfg.portWs });
 
     this.initServer()
   }
-
-  public setSubscriber = (subscriber: ISubscriber): void => {
-    this.subscriber = subscriber
-  }
-
+  
   public initServer = (): void => {
     
     this.wsServer.on('connection', wsConnection => {
@@ -73,11 +67,16 @@ export class WsMessageCenter {
 
   public newJudgementRequestHandler = (request: WsChallengeRequest): void => {
     this.logger.info('New Judgement Request to be sent to the challenger app: '+JSON.stringify(request))
-    this.wsServer.clients.forEach(wsConnection => wsConnection.send( JSON.stringify(request as WsChallengeRequest)) )
+    this.wsServer.clients.forEach(wsConnection => wsConnection.send( JSON.stringify(request)) )
   }
 
   public judgementUnrequestedHandler = (request: WsChallengeUnrequest): void => {
     this.logger.info('JudgementUnrequest to be sent to the challenger app: '+JSON.stringify(request))
-    this.wsServer.clients.forEach(wsConnection => wsConnection.send( JSON.stringify(request as WsChallengeUnrequest)) )
+    this.wsServer.clients.forEach(wsConnection => wsConnection.send( JSON.stringify(request)) )
+  }
+
+  public judgementGivenHandler = (message: WsAck): void => {
+    this.logger.info('JudgementGivenAck to be sent to the challenger app: '+JSON.stringify(message))
+    this.wsServer.clients.forEach(wsConnection => wsConnection.send(JSON.stringify(message)) )
   }
 }

@@ -44,6 +44,7 @@ export interface WsAck {
   event: 'ack';
   data: {
     result: string;
+    address?: string;
   };
 }
 

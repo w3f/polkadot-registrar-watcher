@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { ISubscriber } from './ISubscriber'
-import { WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse } from '../types'
+import { WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck } from '../types'
 
 export class SubscriberMock implements ISubscriber {
 
@@ -12,6 +12,8 @@ export class SubscriberMock implements ISubscriber {
 
   public setJudgementUnrequestHandler = (_handler: (request: WsChallengeUnrequest) => void ): void => {}
 
+  public setJudgementGivenHandler = (_handler: (request: WsAck) => void ): void => {}
+
   public getAllOurPendingWsChallengeRequests = async (): Promise<WsPendingChallengesResponse> => {
     const result: WsPendingChallengesResponse = {
       event: 'pendingJudgementsResponse',
@@ -20,6 +22,6 @@ export class SubscriberMock implements ISubscriber {
     return result
   }
 
-  public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<void> => {}
+  public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<boolean> => { return false }
 
 }
