@@ -25,6 +25,9 @@ export const buildWsChallengeRequestData = (accountId: string, info: IdentityInf
   if(!info.legal.isNull && !info.legal.isEmpty && !info.legal.isNone){
     accounts['legal_name'] = info.legal.value.toHuman()
   }
+  if(!info.display.isNull && !info.display.isEmpty && !info.display.isNone){
+    accounts['display_name'] = info.display.value.toHuman()
+  }
 
   const request: WsChallengeRequestData = {
       address: accountId,

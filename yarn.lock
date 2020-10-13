@@ -626,6 +626,13 @@
   dependencies:
     winston "^3.2.1"
 
+"@w3f/logger@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@w3f/logger/-/logger-0.4.2.tgz#1e2f77f4b8e843dc31b19a3cd5e92f97d803bef1"
+  integrity sha512-CdyEttjo+3QLMvFHEn0pPvGrxkPX46KawbRcWHjWGPGsVv57IA7pH/Lmsow/Jk+bfRL1R5KqVodws0I9Xyh/xg==
+  dependencies:
+    winston "^3.3.3"
+
 "@w3f/test-utils@^0.8.8":
   version "0.8.8"
   resolved "https://registry.yarnpkg.com/@w3f/test-utils/-/test-utils-0.8.8.tgz#81f98fadf4f1670e7b747d66afe3fa586505cef0"
@@ -3488,7 +3495,7 @@ winston-transport@^4.4.0:
     readable-stream "^2.3.7"
     triple-beam "^1.2.0"
 
-winston@^3.2.1:
+winston@^3.2.1, winston@^3.3.3:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/winston/-/winston-3.3.3.tgz#ae6172042cafb29786afa3d09c8ff833ab7c9170"
   integrity sha512-oEXTISQnC8VlSAKf1KYSSd7J6IWuRPQqDdo8eoRNaYKLvwSb5+79Z3Yi1lrl6KDpU6/VWaxpakDAtb1oQ4n9aw==
