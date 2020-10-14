@@ -143,7 +143,7 @@ export const extractIdentityInfoFromEvent = (event: Event): string =>{
   return accountId
 }
 
-export const extractRegistrationEntry = (key: StorageKey, exposure: Option<Registration>): {accountId: string, judgements: Vec<RegistrationJudgement>, info: IdentityInfo} => {
+export const extractRegistrationEntry = (key: StorageKey, exposure: Option<Registration>): {accountId: string; judgements: Vec<RegistrationJudgement>; info: IdentityInfo} => {
   const registration = exposure as Option<Registration>
   const accountId = key.args.map((k) => k.toHuman()).toString()
   const judgements = registration.unwrap().judgements

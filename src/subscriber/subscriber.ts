@@ -1,12 +1,12 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { SessionIndex, Registration, IdentityInfo, RegistrationJudgement } from '@polkadot/types/interfaces';
+import { SessionIndex, Registration, IdentityInfo } from '@polkadot/types/interfaces';
 import { Logger } from '@w3f/logger';
-import { Text, StorageKey } from '@polkadot/types/primitive';
+import { Text } from '@polkadot/types/primitive';
 import {
     InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck, WsDisplayNameResponse
 } from '../types';
 import Event from '@polkadot/types/generic/Event';
-import { Option, Vec } from '@polkadot/types'
+import { Option } from '@polkadot/types'
 import fs from 'fs'
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
