@@ -51,6 +51,12 @@ export class WsMessageCenter {
         this.logger.info('WsPendingChallengesResponse to be sent to the challenger app: '+JSON.stringify(response))
         wsConnection.send( JSON.stringify(response) ) 
       }
+
+      if(data['event'] == 'displayNamesRequest'){
+        const response = await this.subscriber.getAllDisplayNames()
+        this.logger.info('WsDisplayNameResponse to be sent to the challenger app: '+JSON.stringify(response))
+        wsConnection.send( JSON.stringify(response) ) 
+      }
     }
 
     wsConnection.onerror = (event): void => {

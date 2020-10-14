@@ -91,5 +91,13 @@ export interface WsChallengeUnrequest {
   };
 }
 
+export interface WsDisplayNameRequest {
+  event: 'displayNamesRequest';
+}
+
+export interface WsDisplayNameResponse {
+  event: 'displayNamesResponse';
+  data: Array<string>;
+}
 
 

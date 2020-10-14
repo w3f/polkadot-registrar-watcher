@@ -1,16 +1,16 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { SessionIndex, Registration, IdentityInfo } from '@polkadot/types/interfaces';
+import { SessionIndex, Registration, IdentityInfo, RegistrationJudgement } from '@polkadot/types/interfaces';
 import { Logger } from '@w3f/logger';
-import { Text } from '@polkadot/types/primitive';
+import { Text, StorageKey } from '@polkadot/types/primitive';
 import {
-    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck
+    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck, WsDisplayNameResponse
 } from '../types';
 import Event from '@polkadot/types/generic/Event';
-import { Option } from '@polkadot/types'
+import { Option, Vec } from '@polkadot/types'
 import fs from 'fs'
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
-import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent, buildJudgementGivenAck } from "../utils";
+import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent, buildJudgementGivenAck, extractRegistrationEntry } from "../utils";
 import { ISubscriber } from './ISubscriber'
 
 export class Subscriber implements ISubscriber {
@@ -307,13 +307,8 @@ export class Subscriber implements ISubscriber {
       const entries = await this.api.query.identity.identityOf.entries()
 
       entries.forEach(([key, exposure]) => {
-        const registration = exposure as Option<Registration>
-        const accountId = key.args.map((k) => k.toHuman()).toString()
-        const judgements = registration.unwrap().judgements
-        const info = registration.unwrap().info 
-        this.logger.debug(`accountId: ${accountId}`);
-        this.logger.debug(`\tregistration: ${judgements} `);
-        this.logger.debug(`\tinfo: ${info} `);
+
+        const {accountId,judgements,info} = extractRegistrationEntry(key,exposure)
 
         if(isJudgementsFieldCompliant(judgements, this.registrarIndex)){
           result.data.push(buildWsChallengeRequestData(accountId, info))
@@ -324,6 +319,26 @@ export class Subscriber implements ISubscriber {
       return result
 
     } 
+
+    public getAllDisplayNames = async (): Promise<WsDisplayNameResponse> => {
+      const result: WsDisplayNameResponse = {
+        event: 'displayNamesResponse',
+        data: []
+      }
+
+      const entries = await this.api.query.identity.identityOf.entries()
+
+      entries.forEach(([key, exposure]) => {
+        const {info} = extractRegistrationEntry(key,exposure)
+
+        //TODO no filtering for now
+        if(!info.display.isNull && !info.display.isEmpty && !info.display.isNone){
+          result.data.push(info.display.value.toHuman().toString())
+        }
+      })
+
+      return result
+    }
 
     private _isAccountIdWaitingOurJudgement = async(acountId: string): Promise<boolean> => {
       let result = false

@@ -1,7 +1,7 @@
 import { WsChallengeUnrequest, WsChallengeRequest, WsErrorMessage, WsAck, JudgementRequest, WsChallengeRequestData } from "./types"
-import { IdentityInfo, RegistrationJudgement } from "@polkadot/types/interfaces"
+import { IdentityInfo, RegistrationJudgement, Registration } from "@polkadot/types/interfaces"
 import Event from '@polkadot/types/generic/Event';
-import { Vec } from "@polkadot/types";
+import { Vec, Option, StorageKey } from "@polkadot/types";
 import fs from "fs";
 
 export const initPersistenceDir = (dir: string): void =>{
@@ -141,4 +141,20 @@ export const extractJudgementInfoFromEvent = (event: Event): JudgementRequest =>
 export const extractIdentityInfoFromEvent = (event: Event): string =>{
   const accountId = event.data[0].toString()
   return accountId
+}
+
+export const extractRegistrationEntry = (key: StorageKey, exposure: Option<Registration>): {accountId: string, judgements: Vec<RegistrationJudgement>, info: IdentityInfo} => {
+  const registration = exposure as Option<Registration>
+  const accountId = key.args.map((k) => k.toHuman()).toString()
+  const judgements = registration.unwrap().judgements
+  const info = registration.unwrap().info 
+  this.logger.debug(`accountId: ${accountId}`);
+  this.logger.debug(`\tregistration: ${judgements} `);
+  this.logger.debug(`\tinfo: ${info} `);
+
+  return {
+    accountId: accountId,
+    judgements: judgements,
+    info: info
+  }
 }
