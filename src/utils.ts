@@ -148,10 +148,7 @@ export const extractRegistrationEntry = (key: StorageKey, exposure: Option<Regis
   const accountId = key.args.map((k) => k.toHuman()).toString()
   const judgements = registration.unwrap().judgements
   const info = registration.unwrap().info 
-  this.logger.debug(`accountId: ${accountId}`);
-  this.logger.debug(`\tregistration: ${judgements} `);
-  this.logger.debug(`\tinfo: ${info} `);
-
+  
   return {
     accountId: accountId,
     judgements: judgements,

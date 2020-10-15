@@ -309,6 +309,9 @@ export class Subscriber implements ISubscriber {
       entries.forEach(([key, exposure]) => {
 
         const {accountId,judgements,info} = extractRegistrationEntry(key,exposure)
+        this.logger.debug(`accountId: ${accountId}`);
+        this.logger.debug(`\tregistration: ${judgements} `);
+        this.logger.debug(`\tinfo: ${info} `);
 
         if(isJudgementsFieldCompliant(judgements, this.registrarIndex)){
           result.data.push(buildWsChallengeRequestData(accountId, info))
@@ -330,6 +333,7 @@ export class Subscriber implements ISubscriber {
 
       entries.forEach(([key, exposure]) => {
         const {info} = extractRegistrationEntry(key,exposure)
+        this.logger.debug(`\tinfo: ${info} `);
 
         //TODO no filtering for now
         if(!info.display.isNull && !info.display.isEmpty && !info.display.isNone){
