@@ -10,7 +10,7 @@ import { Option } from '@polkadot/types'
 import fs from 'fs'
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
-import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent, buildJudgementGivenAck, extractRegistrationEntry } from "../utils";
+import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent, buildJudgementGivenAck, extractRegistrationEntry, isDataPresent, isJudgementsFieldDisplayNamesCompliant } from "../utils";
 import { ISubscriber } from './ISubscriber'
 
 export class Subscriber implements ISubscriber {
@@ -332,12 +332,12 @@ export class Subscriber implements ISubscriber {
       const entries = await this.api.query.identity.identityOf.entries()
 
       entries.forEach(([key, exposure]) => {
-        const {info} = extractRegistrationEntry(key,exposure)
-        this.logger.debug(`\tinfo: ${info} `);
+        const {info, judgements} = extractRegistrationEntry(key,exposure)
+        this.logger.debug(`\tinfo: ${info}`);
+        this.logger.debug(`\tjudgements: ${judgements}`);
 
-        //TODO no filtering for now
-        if(!info.display.isNull && !info.display.isEmpty && !info.display.isNone){
-          result.data.push(info.display.value.toHuman().toString())
+        if(isJudgementsFieldDisplayNamesCompliant(judgements)){
+          isDataPresent(info.display) && result.data.push(info.display.value.toHuman().toString())
         }
       })
 
