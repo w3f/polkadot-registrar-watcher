@@ -1,7 +1,7 @@
 import { WsChallengeUnrequest, WsChallengeRequest, WsErrorMessage, WsAck, JudgementRequest, WsChallengeRequestData } from "./types"
-import { IdentityInfo, RegistrationJudgement } from "@polkadot/types/interfaces"
+import { IdentityInfo, RegistrationJudgement, Registration } from "@polkadot/types/interfaces"
 import Event from '@polkadot/types/generic/Event';
-import { Vec } from "@polkadot/types";
+import { Vec, Option, StorageKey, Data } from "@polkadot/types";
 import fs from "fs";
 
 export const initPersistenceDir = (dir: string): void =>{
@@ -10,22 +10,26 @@ export const initPersistenceDir = (dir: string): void =>{
   }
 }
 
+export const isDataPresent = (data: Data): boolean => {
+  return !data.isNull && !data.isEmpty && !data.isNone
+}
+
 export const buildWsChallengeRequestData = (accountId: string, info: IdentityInfo): WsChallengeRequestData => {
 
   const accounts = {}
-  if(!info.email.isNull && !info.email.isEmpty && !info.email.isNone){
+  if(isDataPresent(info.email)){
     accounts['email'] = info.email.value.toHuman()
   }
-  if(!info.riot.isNull && !info.riot.isEmpty && !info.riot.isNone){
+  if(isDataPresent(info.riot)){
     accounts['matrix'] = info.riot.value.toHuman()
   }
-  if(!info.twitter.isNull && !info.twitter.isEmpty && !info.twitter.isNone){
+  if(isDataPresent(info.twitter)){
     accounts['twitter'] = info.twitter.value.toHuman()
   }
-  if(!info.legal.isNull && !info.legal.isEmpty && !info.legal.isNone){
+  if(isDataPresent(info.legal)){
     accounts['legal_name'] = info.legal.value.toHuman()
   }
-  if(!info.display.isNull && !info.display.isEmpty && !info.display.isNone){
+  if(isDataPresent(info.display)){
     accounts['display_name'] = info.display.value.toHuman()
   }
 
@@ -114,9 +118,22 @@ export const isIdentitySetEvent = (event: Event): boolean => {
   return event.section == 'identity' && event.method == 'IdentitySet'
 }
 
+const _isErroneousJudgement = (judgement: RegistrationJudgement): boolean => {
+  if(!judgement[1]) return false
+  return judgement[1].isErroneous
+}
+
 const _isAlreadyJudged = (judgement: RegistrationJudgement): boolean => {
   if(!judgement[1]) return false
   return judgement[1].isErroneous || judgement[1].isReasonable || judgement[1].isKnownGood || judgement[1].isLowQuality || judgement[1].isOutOfDate
+}
+
+export const isJudgementsFieldDisplayNamesCompliant = (judgements: Vec<RegistrationJudgement>): boolean =>{
+  let isCompliant = false
+  for (const judgement of judgements) {
+    if(_isAlreadyJudged(judgement) && !_isErroneousJudgement(judgement)) isCompliant = true 
+  }
+  return isCompliant
 }
 
 const _isOurRegistrarTargetted = (judgement: RegistrationJudgement, registrarIndex: number): boolean => {
@@ -127,7 +144,7 @@ const _isOurRegistrarTargetted = (judgement: RegistrationJudgement, registrarInd
 export const isJudgementsFieldCompliant = (judgements: Vec<RegistrationJudgement>, registrarIndex: number): boolean =>{
   let isCompliant = false
   for (const judgement of judgements) {
-    if(_isOurRegistrarTargetted(judgement,registrarIndex) && !_isAlreadyJudged(judgement)) isCompliant = true // add a further check here, it has not to be 
+    if(_isOurRegistrarTargetted(judgement,registrarIndex) && !_isAlreadyJudged(judgement)) isCompliant = true
   }
   return isCompliant
 }
@@ -141,4 +158,17 @@ export const extractJudgementInfoFromEvent = (event: Event): JudgementRequest =>
 export const extractIdentityInfoFromEvent = (event: Event): string =>{
   const accountId = event.data[0].toString()
   return accountId
+}
+
+export const extractRegistrationEntry = (key: StorageKey, exposure: Option<Registration>): {accountId: string; judgements: Vec<RegistrationJudgement>; info: IdentityInfo} => {
+  const registration = exposure as Option<Registration>
+  const accountId = key.args.map((k) => k.toHuman()).toString()
+  const judgements = registration.unwrap().judgements
+  const info = registration.unwrap().info 
+  
+  return {
+    accountId: accountId,
+    judgements: judgements,
+    info: info
+  }
 }

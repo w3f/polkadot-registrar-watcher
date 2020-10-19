@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { ISubscriber } from './ISubscriber'
-import { WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck } from '../types'
+import { WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck, WsDisplayNameResponse } from '../types'
 
 export class SubscriberMock implements ISubscriber {
 
@@ -17,6 +17,14 @@ export class SubscriberMock implements ISubscriber {
   public getAllOurPendingWsChallengeRequests = async (): Promise<WsPendingChallengesResponse> => {
     const result: WsPendingChallengesResponse = {
       event: 'pendingJudgementsResponse',
+      data: []
+    }
+    return result
+  }
+
+  public getAllDisplayNames = async (): Promise<WsDisplayNameResponse> => {
+    const result: WsDisplayNameResponse = {
+      event: 'displayNamesResponse',
       data: []
     }
     return result
