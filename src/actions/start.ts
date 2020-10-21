@@ -1,49 +1,46 @@
 import express from 'express';
-import { createLogger, Logger } from '@w3f/logger';
+import { createLogger } from '@w3f/logger';
 import { Config } from '@w3f/config';
 import { InputConfig } from '../types';
 import { WsMessageCenter } from "../messageCenter";
 import { SubscriberFactory } from '../subscriber/subscriberFactory';
 import { ISubscriber } from '../subscriber/ISubscriber';
+import { Prometheus } from '../prometheus';
 
-export class StartAction {
-  private cfg: InputConfig;
-  private subscriber: ISubscriber;
-  private logger: Logger;
+const _startHttpServer = (port: number): express.Application =>{
+  const server = express();
 
-  public execute = async (cmd: { config: string }): Promise<void> => {
+  server.get('/healthcheck',
+      async (req: express.Request, res: express.Response): Promise<void> => {
+          res.status(200).send('OK!')
+      })
+      
+  server.listen(port);
+  return server
+}
 
-    this._initInstanceVariables(cmd)
+const _setSubscriberHandlers = (subscriber: ISubscriber, messageCenter: WsMessageCenter): void => {
+  subscriber.setNewJudgementRequestHandler(messageCenter.newJudgementRequestHandler)
+  subscriber.setJudgementUnrequestHandler(messageCenter.judgementUnrequestedHandler)
+  subscriber.setJudgementGivenHandler(messageCenter.judgementGivenHandler)
+}
 
-    await this.subscriber.start();
+export const startAction = async (cmd: { config: string }): Promise<void> =>{
+ 
+  const cfg = new Config<InputConfig>().parse(cmd.config);
+  
+  const logger = createLogger(cfg.logLevel);
+  
+  const server = _startHttpServer(cfg.port)
 
-    const wsMC = new WsMessageCenter(this.cfg,this.subscriber,this.logger)
-    this._setSubscriberHandlers(this.subscriber, wsMC)
+  const promClient = new Prometheus(logger);
+  promClient.injectMetricsRoute(server)
+  promClient.startCollection()
 
-    this._initHttpServer()
+  const subscriber = new SubscriberFactory(cfg,logger).makeSubscriber()
+  await subscriber.start();
 
-  }
-
-  _initInstanceVariables = (cmd: { config: string }): void => {
-    this.cfg = new Config<InputConfig>().parse(cmd.config);
-    this.logger = createLogger(this.cfg.logLevel);
-    this.subscriber = new SubscriberFactory(this.cfg,this.logger).makeSubscriber()
-  }
-
-  _setSubscriberHandlers = (subscriber: ISubscriber, messageCenter: WsMessageCenter): void => {
-    subscriber.setNewJudgementRequestHandler(messageCenter.newJudgementRequestHandler)
-    subscriber.setJudgementUnrequestHandler(messageCenter.judgementUnrequestedHandler)
-    subscriber.setJudgementGivenHandler(messageCenter.judgementGivenHandler)
-  }
-
-  _initHttpServer = (): void => {
-    const server = express();
-
-    server.get('/healthcheck',
-        async (req: express.Request, res: express.Response): Promise<void> => {
-            res.status(200).send('OK!')
-        })
-
-    server.listen(this.cfg.port);
-  }
+  const wsMC = new WsMessageCenter(cfg,subscriber,logger)
+  _setSubscriberHandlers(subscriber, wsMC)
+  wsMC.initServer()
 }
