@@ -19,7 +19,7 @@ export class Subscriber implements ISubscriber {
     private endpoint: string;
     private sessionIndex: SessionIndex;
     private logLevel: string;
-    private registrarIndex = 3 
+    private registrarIndex: number; 
     private registrarWalletFilePath: string;
     private registrarPasswordFilePath: string;
     private registrarAccount: KeyringPair;
@@ -62,6 +62,7 @@ export class Subscriber implements ISubscriber {
     }
 
     private _initKey = (): void =>{
+      this.logger.debug(`init registrar with index ${this.registrarIndex} ...`)
       const keyring = new Keyring({ type: 'sr25519' });
       const keyJson = JSON.parse(fs.readFileSync(this.registrarWalletFilePath, { encoding: 'utf-8' })) as KeyringPair$Json;
       const passwordContent = fs.readFileSync(this.registrarPasswordFilePath, { encoding: 'utf-8' });
