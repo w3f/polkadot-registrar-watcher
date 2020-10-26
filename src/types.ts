@@ -6,7 +6,7 @@ export interface InputConfig {
     requestsDir: string;
     registrar: {
       index: number;
-      proxy: ProxyConfig;
+      proxy?: ProxyConfig;
       keystore: {
         walletFilePath: string;
         passwordFilePath: string;

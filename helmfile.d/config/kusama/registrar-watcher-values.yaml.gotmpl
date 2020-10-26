@@ -3,6 +3,9 @@ config:
     endpoint: "ws://rpc-node-base-services-external-websockets:9944"
   registrar:
     index: 0
+    proxy:
+      enabled: true
+      primaryAccount: {{ env "REGISTRAR_KUSAMA_PRIMARY_ADDR" }}
 
 secret:
   registrarPasswordValue: {{ env "REGISTRAR_KUSAMA_PASS" }}

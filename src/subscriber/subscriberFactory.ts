@@ -15,7 +15,7 @@ export class SubscriberFactory {
     if(this.cfg.node.enabled == false){
       return new SubscriberMock();
     }
-    if(this.cfg.registrar.proxy.enabled){
+    if(this.cfg.registrar.proxy && this.cfg.registrar.proxy.enabled){
       return new SubscriberProxy(this.cfg,this.logger)
     }
     else return new Subscriber(this.cfg,this.logger); 
