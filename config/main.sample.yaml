@@ -6,6 +6,9 @@ portWs: 3001
 logLevel: info
 registrar:
   index: 0
+  proxy:
+    enabled: true
+    primaryAccount: xxxx
   keystore:
     walletFilePath: /Users/ale/Downloads/5GpmfR5PWHX3x1X6wsZhDdpN1F4UKUYPr6mgPZKqLiJRgp5q.json
     passwordFilePath: '/Users/ale/Downloads/password'

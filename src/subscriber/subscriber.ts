@@ -15,21 +15,21 @@ import { ISubscriber } from './ISubscriber'
 
 export class Subscriber implements ISubscriber {
     private chain: Text;
-    private api: ApiPromise;
+    protected api: ApiPromise;
     private endpoint: string;
     private sessionIndex: SessionIndex;
     private logLevel: string;
-    private registrarIndex: number; 
+    protected registrarIndex: number; 
     private registrarWalletFilePath: string;
     private registrarPasswordFilePath: string;
-    private registrarAccount: KeyringPair;
+    protected registrarAccount: KeyringPair;
     private wsNewJudgementRequestHandler: (request: WsChallengeRequest) => void;
     private wsJudgementUnrequestedHandler: (message: WsChallengeUnrequest) => void;
     private wsJudgementGievenHandler: (message: WsAck) => void;
 
     constructor(
         cfg: InputConfig,
-        private readonly logger: Logger) {
+        protected readonly logger: Logger) {
         this.endpoint = cfg.node.endpoint;
         this.logLevel = cfg.logLevel;
         this.registrarIndex = cfg.registrar.index;
@@ -287,7 +287,7 @@ export class Subscriber implements ISubscriber {
       await this._triggerExtrinsicProvideJudgement(target,{Erroneous: true})
     }
 
-    private _triggerExtrinsicProvideJudgement = async (target: string, judgement: {Reasonable: boolean} | {Erroneous: boolean} ): Promise<void> =>{      
+    protected _triggerExtrinsicProvideJudgement = async (target: string, judgement: {Reasonable: boolean} | {Erroneous: boolean} ): Promise<void> =>{      
       //const txHash = await this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement).signAndSend(this.registrarAccount)
       this.logger.debug(`account ${JSON.stringify(this.registrarAccount)}`)
       const extrinsic = this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement)

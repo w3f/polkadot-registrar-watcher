@@ -6,11 +6,17 @@ export interface InputConfig {
     requestsDir: string;
     registrar: {
       index: number;
+      proxy: ProxyConfig;
       keystore: {
         walletFilePath: string;
         passwordFilePath: string;
       };
     };
+}
+
+interface ProxyConfig {
+  enabled: boolean;
+  primaryAccount: string;
 }
 
 interface NodeConfig {
