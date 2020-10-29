@@ -144,11 +144,17 @@ const _isOurRegistrarTargetted = (judgement: RegistrationJudgement, registrarInd
   return judgement[0].toNumber() == registrarIndex
 }
 
-export const isJudgementsFieldCompliant = (judgements: Vec<RegistrationJudgement>, registrarIndex: number): boolean =>{
+const _isInfoChallengeCompliant = (info: IdentityInfo): boolean => {
+  return !isDataPresent(info.web) && !isDataPresent(info.legal) && !isDataPresent(info.image) && info.additional.isEmpty
+}
+
+export const isClaimChallengeCompliant = (judgements: Vec<RegistrationJudgement>, registrarIndex: number, info: IdentityInfo): boolean =>{
   let isCompliant = false
   for (const judgement of judgements) {
     if(_isOurRegistrarTargetted(judgement,registrarIndex) && !_isAlreadyJudged(judgement)) isCompliant = true
   }
+  if(!_isInfoChallengeCompliant(info)) isCompliant = false
+
   return isCompliant
 }
 

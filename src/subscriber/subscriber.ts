@@ -10,7 +10,7 @@ import { Option } from '@polkadot/types'
 import fs from 'fs'
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
-import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isJudgementsFieldCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent, buildJudgementGivenAck, extractRegistrationEntry, isDataPresent, isJudgementsFieldDisplayNamesCompliant } from "../utils";
+import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isClaimChallengeCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent, buildJudgementGivenAck, extractRegistrationEntry, isDataPresent, isJudgementsFieldDisplayNamesCompliant } from "../utils";
 import { ISubscriber } from './ISubscriber'
 
 export class Subscriber implements ISubscriber {
@@ -231,7 +231,7 @@ export class Subscriber implements ISubscriber {
         return
       }
       
-      if( !isJudgementsFieldCompliant(judgements, this.registrarIndex) ){
+      if( !isClaimChallengeCompliant(judgements, this.registrarIndex, info) ){
         this.logger.info(`${accountId} has a not interesting identity claim`)
         this.logger.info(`${identity.unwrap().judgements.toString()}`)
         return
@@ -311,7 +311,7 @@ export class Subscriber implements ISubscriber {
         this.logger.debug(`\tregistration: ${judgements} `);
         this.logger.debug(`\tinfo: ${info} `);
 
-        if(isJudgementsFieldCompliant(judgements, this.registrarIndex)){
+        if(isClaimChallengeCompliant(judgements, this.registrarIndex, info)){
           result.data.push(buildWsChallengeRequestData(accountId, info))
         }
 
