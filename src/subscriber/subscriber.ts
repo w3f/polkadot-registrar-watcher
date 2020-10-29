@@ -288,12 +288,7 @@ export class Subscriber implements ISubscriber {
     }
 
     protected _triggerExtrinsicProvideJudgement = async (target: string, judgement: {Reasonable: boolean} | {Erroneous: boolean} ): Promise<void> =>{      
-      //const txHash = await this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement).signAndSend(this.registrarAccount)
-      this.logger.debug(`account ${JSON.stringify(this.registrarAccount)}`)
       const extrinsic = this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement)
-      this.logger.debug(`extrinsic ${JSON.stringify(extrinsic)}`)
-      const signed = extrinsic.sign(this.registrarAccount)
-      this.logger.debug(`signed ${JSON.stringify(signed)}`)
       const txHash = await extrinsic.signAndSend(this.registrarAccount)
       this.logger.info(`Judgement Submitted with hash ${txHash}`);
     }
@@ -310,6 +305,8 @@ export class Subscriber implements ISubscriber {
       entries.forEach(([key, exposure]) => {
 
         const {accountId,judgements,info} = extractRegistrationEntry(key,exposure)
+
+        this.logger.debug(`getAllOurPendingWsChallengeRequests candidates:`);
         this.logger.debug(`accountId: ${accountId}`);
         this.logger.debug(`\tregistration: ${judgements} `);
         this.logger.debug(`\tinfo: ${info} `);
@@ -333,10 +330,13 @@ export class Subscriber implements ISubscriber {
       const entries = await this.api.query.identity.identityOf.entries()
 
       entries.forEach(([key, exposure]) => {
+        
         const {info, judgements} = extractRegistrationEntry(key,exposure)
+
+        this.logger.debug(`getAllDisplayNames candidates`);
         this.logger.debug(`\tinfo: ${info}`);
         this.logger.debug(`\tjudgements: ${judgements}`);
-
+        
         if(isJudgementsFieldDisplayNamesCompliant(judgements)){
           isDataPresent(info.display) && result.data.push(info.display.value.toHuman().toString())
         }

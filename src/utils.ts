@@ -32,6 +32,9 @@ export const buildWsChallengeRequestData = (accountId: string, info: IdentityInf
   if(isDataPresent(info.display)){
     accounts['display_name'] = info.display.value.toHuman()
   }
+  if(isDataPresent(info.web)){
+    accounts['web'] = info.web.value.toHuman()
+  }
 
   const request: WsChallengeRequestData = {
       address: accountId,

@@ -16,8 +16,8 @@ export class SubscriberProxy extends Subscriber {
 
   protected _triggerExtrinsicProvideJudgement = async (target: string, judgement: {Reasonable: boolean} | {Erroneous: boolean} ): Promise<void> =>{     
     
-    const callIndex = this.api.tx.identity.provideJudgement.callIndex
-    const extrinsic = this.api.tx.proxy.proxy(this.registrarPrimaryAccount, null, { callIndex, args:[this.registrarIndex,target,judgement] })
+    const call = this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement)
+    const extrinsic = this.api.tx.proxy.proxy(this.registrarPrimaryAccount, null, call)
     const txHash = await extrinsic.signAndSend(this.registrarAccount)
     this.logger.info(`Judgement Submitted with hash ${txHash}`);
 
