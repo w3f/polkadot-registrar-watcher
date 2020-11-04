@@ -120,7 +120,7 @@ workflows:
             - integrationTests
       - deploy:
           context: 
-            - engineering-access
+            - engineering-access-registrar
             - registrars-wallets
           filters:
             branches:
