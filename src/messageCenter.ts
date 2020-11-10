@@ -14,7 +14,7 @@ export class WsMessageCenter {
     //this.initServer()
   }
 
-  private setPendingChallengesMessageExpected = (isExpected:boolean): void => {
+  private setPendingChallengesMessageExpected = (isExpected: boolean): void => {
     this.isPendingChallengesMessageExpected = isExpected
   }
   
