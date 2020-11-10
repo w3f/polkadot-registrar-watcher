@@ -6,11 +6,16 @@ import { ISubscriber } from "./subscriber/ISubscriber";
 
 export class WsMessageCenter {
   private wsServer: WebSocket.Server
+  private isPendingChallengesMessageExpected = true
 
   constructor(cfg: InputConfig, readonly subscriber: ISubscriber, readonly logger: Logger) {
     this.wsServer = new WebSocket.Server({ port: cfg.portWs });
 
     //this.initServer()
+  }
+
+  private setPendingChallengesMessageExpected = (isExpected:boolean): void => {
+    this.isPendingChallengesMessageExpected = isExpected
   }
   
   public initServer = (): void => {
@@ -48,7 +53,11 @@ export class WsMessageCenter {
 
       if(data['event'] == 'pendingJudgementsRequest'){
         const response = await this.subscriber.getAllOurPendingWsChallengeRequests()
-        this.logger.info('WsPendingChallengesResponse to be sent to the challenger app: '+JSON.stringify(response))
+        if(this.isPendingChallengesMessageExpected) {
+          this.logger.info('WsPendingChallengesResponse to be sent to the challenger app: '+JSON.stringify(response))
+          this.setPendingChallengesMessageExpected(false)
+        }
+        else this.logger.debug('WsPendingChallengesResponse to be sent to the challenger app: '+JSON.stringify(response))
         wsConnection.send( JSON.stringify(response) ) 
       }
 
@@ -65,6 +74,7 @@ export class WsMessageCenter {
     }
 
     wsConnection.onclose = (event): void => {
+      this.setPendingChallengesMessageExpected(true)
       this.logger.info(`connection with target ${event.target.url} closed`)
     }
   
