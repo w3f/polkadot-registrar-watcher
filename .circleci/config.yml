@@ -24,7 +24,8 @@ jobs:
       - image: web3f/ci-commons:v2.4.0
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           command: |
             /scripts/build-image.sh web3f/polkadot-registrar-watcher .
