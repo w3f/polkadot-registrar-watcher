@@ -233,7 +233,8 @@ export class Subscriber implements ISubscriber {
       
       if( !isClaimChallengeCompliant(judgements, this.registrarIndex, info) ){
         this.logger.info(`${accountId} has a not interesting identity claim`)
-        this.logger.info(`${identity.unwrap().judgements.toString()}`)
+        this.logger.info(`${judgements.toString()}`)
+        this.logger.info(`${info.toString()}`)
         return
       }
 

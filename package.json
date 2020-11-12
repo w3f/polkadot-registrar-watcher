@@ -1,6 +1,6 @@
 {
   "name": "polkadot-registrar-watcher",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "description": "Registrar",
   "repository": "git@github.com:w3f/polkadot-registrar-watcher.git",
   "author": "W3F Infrastructure Team <devops@web3.foundation>",
