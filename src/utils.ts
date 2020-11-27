@@ -153,8 +153,10 @@ export const isClaimChallengeCompliant = (judgements: Vec<RegistrationJudgement>
   for (const judgement of judgements) {
     if(_isOurRegistrarTargetted(judgement,registrarIndex) && !_isAlreadyJudged(judgement)) isCompliant = true
   }
-  if(!_isInfoChallengeCompliant(info)) isCompliant = false
-
+  if(!_isInfoChallengeCompliant(info)) {
+    // isCompliant = false // DISABLED Filtering, now it is a challenger task
+  }
+  
   return isCompliant
 }
 
