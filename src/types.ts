@@ -103,7 +103,12 @@ export interface WsDisplayNameRequest {
 
 export interface WsDisplayNameResponse {
   event: 'displayNamesResponse';
-  data: Array<string>;
+  data: Array<DisplayNameResponse>;
+}
+
+interface DisplayNameResponse {
+  displayName: string;
+  address: string;
 }
 
 
