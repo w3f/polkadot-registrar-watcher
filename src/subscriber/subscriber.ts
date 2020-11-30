@@ -332,14 +332,17 @@ export class Subscriber implements ISubscriber {
 
       entries.forEach(([key, exposure]) => {
         
-        const {info, judgements} = extractRegistrationEntry(key,exposure)
+        const {info, judgements, accountId} = extractRegistrationEntry(key,exposure)
 
         this.logger.debug(`getAllDisplayNames candidates`);
         this.logger.debug(`\tinfo: ${info}`);
         this.logger.debug(`\tjudgements: ${judgements}`);
         
         if(isJudgementsFieldDisplayNamesCompliant(judgements)){
-          isDataPresent(info.display) && result.data.push(info.display.value.toHuman().toString())
+          isDataPresent(info.display) && result.data.push({
+            displayName:info.display.value.toHuman().toString(),
+            address:accountId
+          })
         }
       })
 
