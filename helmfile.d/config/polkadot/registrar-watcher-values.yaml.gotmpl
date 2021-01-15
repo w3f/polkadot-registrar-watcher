@@ -2,8 +2,6 @@ config:
   node:
     endpoint: "ws://polkadot-rpc-node-base-services-external-websockets.polkadot:9944"
   logLevel: info  
-  nodeRestart:
-    enabled: true
   registrar:
     index: 0
     proxy:
@@ -14,3 +12,6 @@ secret:
   registrarPasswordValue: {{ env "REGISTRAR_POLKADOT_PASS" }}
   registrarWalletValue: |
     {{ env "REGISTRAR_POLKADOT_WALLET" }}    
+
+nodeRestart:
+  enabled: true    
