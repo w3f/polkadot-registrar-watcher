@@ -1,7 +1,9 @@
 config:
   node:
     endpoint: "ws://rpc-node-base-services-external-websockets.kusama:9944"
-  logLevel: info  
+  logLevel: info
+  nodeRestart:
+    enabled: true  
   registrar:
     index: 0
     proxy:
