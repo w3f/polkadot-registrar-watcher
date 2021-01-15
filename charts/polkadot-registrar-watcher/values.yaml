@@ -2,7 +2,7 @@ environment: production
 
 image:
   repo: web3f/polkadot-registrar-watcher
-  tag: v0.1.36
+  tag: v0.1.37
 
 config:
   node:
@@ -29,3 +29,11 @@ resources:
   limits:
     cpu: "500m"
     memory: "700Mi" 
+
+nodeRestart:
+  enabled: false
+  schedule: "0 12 * * *"    
+
+restartImage:
+  repo: web3f/pod-restarter
+  tag: v0.1.1
