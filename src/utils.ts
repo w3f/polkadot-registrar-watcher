@@ -1,6 +1,5 @@
 import { WsChallengeUnrequest, WsChallengeRequest, WsErrorMessage, WsAck, JudgementRequest, WsChallengeRequestData } from "./types"
-import { IdentityInfo, RegistrationJudgement, Registration } from "@polkadot/types/interfaces"
-import Event from '@polkadot/types/generic/Event';
+import { IdentityInfo, RegistrationJudgement, Registration, Event } from "@polkadot/types/interfaces"
 import { Vec, Option, StorageKey, Data } from "@polkadot/types";
 import fs from "fs";
 

@@ -1,11 +1,10 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { SessionIndex, Registration, IdentityInfo } from '@polkadot/types/interfaces';
+import { SessionIndex, Registration, IdentityInfo, Event } from '@polkadot/types/interfaces';
 import { Logger } from '@w3f/logger';
 import { Text } from '@polkadot/types/primitive';
 import {
     InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck, WsDisplayNameResponse
 } from '../types';
-import Event from '@polkadot/types/generic/Event';
 import { Option } from '@polkadot/types'
 import fs from 'fs'
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
@@ -106,7 +105,7 @@ export class Subscriber implements ISubscriber {
 
         events.forEach(async (record) => {
           const { event } = record;
-          
+
           await this._handleJudgementEvents(event)
 
           await this._handleIdentityEvents(event)
