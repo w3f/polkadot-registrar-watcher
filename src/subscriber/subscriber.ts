@@ -49,6 +49,15 @@ export class Subscriber implements ISubscriber {
 
     private _initAPI = async (): Promise<void> =>{
         const provider = new WsProvider(this.endpoint);
+        provider.on('error', error => {
+          if(this.api == undefined) {
+            this.logger.error(JSON.stringify("initAPI error:"+JSON.stringify(error)))
+            process.exit(1)
+          }
+          else{
+            this.logger.error(JSON.stringify("Provider error:"+JSON.stringify(error)))
+          }
+        })
         this.api = await ApiPromise.create({ provider });
         this.chain = await this.api.rpc.system.chain();
         const [nodeName, nodeVersion] = await Promise.all([
