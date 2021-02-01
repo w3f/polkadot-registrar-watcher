@@ -54,9 +54,6 @@ export class Subscriber implements ISubscriber {
             this.logger.error(JSON.stringify("initAPI error:"+JSON.stringify(error)))
             process.exit(1)
           }
-          else{
-            this.logger.error(JSON.stringify("Provider error:"+JSON.stringify(error)))
-          }
         })
         this.api = await ApiPromise.create({ provider });
         this.chain = await this.api.rpc.system.chain();
