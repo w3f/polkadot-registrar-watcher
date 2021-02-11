@@ -1,6 +1,6 @@
 {
   "name": "polkadot-registrar-watcher",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Registrar",
   "repository": "git@github.com:w3f/polkadot-registrar-watcher.git",
   "author": "W3F Infrastructure Team <devops@web3.foundation>",
@@ -18,8 +18,8 @@
     "start": "node ./dist/index.js start"
   },
   "dependencies": {
-    "@polkadot/api": "^3.6.4",
-    "@polkadot/types": "^3.6.4",
+    "@polkadot/api": "^3.8.1",
+    "@polkadot/types": "^3.8.1",
     "@types/ws": "^7.2.7",
     "@w3f/config": "^0.1.1",
     "@w3f/logger": "^0.4.2",
@@ -39,7 +39,6 @@
     "@types/tmp": "^0.2.0",
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",
-    "@w3f/test-utils": "^1.0.0",
     "chai": "^4.2.0",
     "eslint": "^6.6.0",
     "fs-extra": "^9.0.0",
