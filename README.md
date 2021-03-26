@@ -44,7 +44,7 @@ After having enstablished a connection with a Substrate based node (WebSocket en
 git clone https://github.com/w3f/polkadot-registrar-watcher.git
 cd polkadot-registrar-watcher
 cp config/main.sample.yaml config/main.yaml #create the default config file
-#just the fist time
+#just the first time
 
 yarn
 yarn build
