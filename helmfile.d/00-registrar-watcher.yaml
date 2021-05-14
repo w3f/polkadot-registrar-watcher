@@ -18,14 +18,6 @@ releases:
 {{- end }}
 
 {{- if eq .Environment.Name "production" }}  
-- name: test-registrar-watcher
-  namespace: registrar-test 
-  chart: w3f/polkadot-registrar-watcher
-  version: v0.2.5
-  values:
-  - ./config/registrar-watcher-values.yaml.gotmpl
-  - ./config/registrar-test/registrar-watcher-values.yaml.gotmpl  
-
 - name: kusama-registrar-watcher
   namespace: registrar-kusama 
   chart: w3f/polkadot-registrar-watcher
