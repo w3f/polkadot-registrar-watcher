@@ -99,8 +99,7 @@ workflows:
             tags:
               only: /.*/
           requires:
-            - helmLint
-            - yarnLint        
+            - buildImage      
       - publishImage:
           context: dockerhub-bot
           filters:
