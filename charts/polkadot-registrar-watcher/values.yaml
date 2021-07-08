@@ -2,7 +2,7 @@ environment: production
 
 image:
   repo: web3f/polkadot-registrar-watcher
-  tag: v0.2.12
+  tag: v0.2.13
 
 config:
   node:
