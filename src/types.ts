@@ -7,6 +7,7 @@ export interface InputConfig {
     registrar: {
       index: number;
       proxy?: ProxyConfig;
+      proxy2Levels?: Proxy2LevelsConfig;
       keystore: {
         walletFilePath: string;
         passwordFilePath: string;
@@ -16,6 +17,12 @@ export interface InputConfig {
 
 interface ProxyConfig {
   enabled: boolean;
+  primaryAccount: string;
+}
+
+interface Proxy2LevelsConfig {
+  enabled: boolean;
+  middleAccount: string;
   primaryAccount: string;
 }
 
