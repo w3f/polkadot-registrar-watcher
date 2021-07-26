@@ -3,6 +3,10 @@ config:
     endpoint: "wss://registrar-test-0.w3f.tech"
   registrar:
     index: 0
+    proxy2Levels:
+      enabled: true
+      primaryAccount: {{ env "REGISTRAR_TEST_PRIMARY_ADDR" }}
+      middleAccount: {{ env "REGISTRAR_TEST_MIDDLE_ADDR" }}
 
 secret:
   registrarPasswordValue: {{ env "REGISTRAR_TEST_PASS" }}

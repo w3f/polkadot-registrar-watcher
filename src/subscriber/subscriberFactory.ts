@@ -4,6 +4,7 @@ import { Subscriber } from "./subscriber";
 import { SubscriberMock } from "./subscriberMock";
 import { ISubscriber } from "./ISubscriber";
 import { SubscriberProxy } from "./subscriberProxy";
+import { SubscriberProxy2Levels } from "./subscriberProxy2Levels";
 
 export class SubscriberFactory {
   constructor(
@@ -15,10 +16,14 @@ export class SubscriberFactory {
     if(this.cfg.node.enabled == false){
       return new SubscriberMock();
     }
-    if(this.cfg.registrar.proxy && this.cfg.registrar.proxy.enabled){
+    if(this.cfg.registrar.proxy?.enabled){
       return new SubscriberProxy(this.cfg,this.logger)
     }
-    else return new Subscriber(this.cfg,this.logger); 
+    if(this.cfg.registrar.proxy2Levels?.enabled){
+      return new SubscriberProxy2Levels(this.cfg,this.logger)
+    }
+    
+    return new Subscriber(this.cfg,this.logger); 
   }
 
 }
