@@ -40,5 +40,5 @@ releases:
   version: v0.3.0
   values:
   - ./config/registrar-watcher-values.yaml.gotmpl
-  - ./config/registrar-test/registrar-watcher-values.yaml.gotmpl    
+  - ./config/testnet/registrar-watcher-values.yaml.gotmpl    
 {{- end }}
