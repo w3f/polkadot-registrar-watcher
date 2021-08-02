@@ -11,6 +11,7 @@ repositories:
 releases:
 
 {{- if or (eq .Environment.Name "ci") (eq .Environment.Name "local") }} 
+
 - name: registrar-watcher
   chart: ../charts/polkadot-registrar-watcher
   values:
@@ -41,3 +42,5 @@ releases:
   values:
   - ./config/registrar-watcher-values.yaml.gotmpl
   - ./config/testnet/registrar-watcher-values.yaml.gotmpl
+
+{{- end }}
