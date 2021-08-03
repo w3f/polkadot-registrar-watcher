@@ -124,6 +124,7 @@ workflows:
           context: 
             - engineering-access-registrar
             - registrars-wallets
+            - registrars-wallets-testnet
           filters:
             branches:
               ignore: /.*/
