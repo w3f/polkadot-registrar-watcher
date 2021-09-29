@@ -3,7 +3,7 @@ version: 2
 jobs:
   helmLint:
     docker:
-      - image: web3f/ci-commons:v2.4.4
+      - image: web3f/ci-commons:v2.4.6
     steps:
       - checkout
       - run:
@@ -21,19 +21,19 @@ jobs:
 
   buildImage:
     docker:
-      - image: web3f/ci-commons:v2.4.4
+      - image: web3f/ci-commons:v2.4.6
     steps:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
-          version: 19.03.13
+          version: 20.10.7
       - run:
           command: |
             /scripts/build-image.sh web3f/polkadot-registrar-watcher .
 
   publishImage:
     docker:
-      - image: web3f/ci-commons:v2.4.4
+      - image: web3f/ci-commons:v2.4.6
     steps:
       - checkout
       - setup_remote_docker
@@ -43,7 +43,7 @@ jobs:
 
   publishChart:
     docker:
-      - image: web3f/ci-commons:v2.4.4
+      - image: web3f/ci-commons:v2.4.6
     steps:
       - checkout
       - run:
@@ -52,11 +52,11 @@ jobs:
 
   integrationTests:
     docker:
-      - image: web3f/ci-commons:v2.4.4
+      - image: web3f/ci-commons:v2.4.6
     steps:
       - checkout
       - setup_remote_docker:
-          version: 19.03.13
+          version: 20.10.7
       - run:
           description: run integration tests
           command: |
@@ -64,7 +64,7 @@ jobs:
             
   deploy:
       docker:
-        - image: web3f/ci-commons:v2.4.4
+        - image: web3f/ci-commons:v2.4.6
       steps:
         - checkout
         - run:
