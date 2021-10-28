@@ -11,7 +11,6 @@ repositories:
 releases:
 
 {{- if or (eq .Environment.Name "ci") (eq .Environment.Name "local") }} 
-
 - name: registrar-watcher
   chart: ../charts/polkadot-registrar-watcher
   values:
@@ -22,7 +21,7 @@ releases:
 - name: kusama-registrar-watcher
   namespace: registrar-v2 
   chart: w3f/polkadot-registrar-watcher
-  version: v0.3.7
+  version: v0.3.8
   values:
   - ./config/registrar-watcher-values.yaml.gotmpl
   - ./config/kusama/registrar-watcher-values.yaml.gotmpl  
@@ -30,17 +29,9 @@ releases:
 - name: polkadot-registrar-watcher
   namespace: registrar-v2 
   chart: w3f/polkadot-registrar-watcher
-  version: v0.3.7
+  version: v0.3.8
   values:
   - ./config/registrar-watcher-values.yaml.gotmpl
   - ./config/polkadot/registrar-watcher-values.yaml.gotmpl  
-
-- name: polkadot-registrar-watcher
-  namespace: registrar-testnet 
-  chart: w3f/polkadot-registrar-watcher
-  version: v0.3.7
-  values:
-  - ./config/registrar-watcher-values.yaml.gotmpl
-  - ./config/testnet/registrar-watcher-values.yaml.gotmpl
 
 {{- end }}
