@@ -437,10 +437,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.1.tgz#88d501e84b6185f6489ecee4ba9e8fcec7f29bb2"
   integrity sha512-NXKvBVUzIbs6ylBwmOwHFkZS2EXCcjnqr8ZCRNaXBkHAf+3mn/rPcJxwrzuc6movh8fxQAsUUfYklJ/EG+hZqQ==
 
-"@types/node@^14.14.32":
-  version "14.18.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.1.tgz#459886b51f52aa923dc06b9ea81cb8b1d733e9d3"
-  integrity sha512-fTFWOFrgAkj737w1o0HLTIgisgYHnsZfeiqhG1Ltrf/iJjudEbUwetQAsfrtVE49JGwvpEzQR+EbMkIqG4227g==
+"@types/node@^14.18.6":
+  version "14.18.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.6.tgz#0ced8ba5ed72367e3f425bfd4731de26afef7849"
+  integrity sha512-lrCEyAVs0sJ+uq5uPn2j1NkAHryhBA8Q1fP2hC2zRiOPyJBMB53ZsdmNX3yPo/sj29EH/3452h1DsIoPTiGELg==
 
 "@types/qs@*":
   version "6.9.7"
