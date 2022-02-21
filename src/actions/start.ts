@@ -1,5 +1,5 @@
 import express from 'express';
-import { createLogger } from '@w3f/logger';
+import { createLogger, Logger } from '@w3f/logger';
 import { Config } from '@w3f/config';
 import { InputConfig } from '../types';
 import { WsMessageCenter } from "../messageCenter";
@@ -27,20 +27,30 @@ const _setSubscriberHandlers = (subscriber: ISubscriber, messageCenter: WsMessag
 
 export const startAction = async (cmd: { config: string }): Promise<void> =>{
  
-  const cfg = new Config<InputConfig>().parse(cmd.config);
+  let logger: Logger
+
+  try {
+    const cfg = new Config<InputConfig>().parse(cmd.config);
+    logger = createLogger(cfg.logLevel);
+    
+    const server = _startHttpServer(cfg.port)
+
+    const promClient = new Prometheus(logger);
+    promClient.injectMetricsRoute(server)
+    promClient.startCollection()
+
+    const subscriber = new SubscriberFactory(cfg,logger).makeSubscriber()
+    await subscriber.start();
+
+    const wsMC = new WsMessageCenter(cfg,subscriber,logger)
+    _setSubscriberHandlers(subscriber, wsMC)
+    wsMC.initServer()
+  } catch (e) {
+      const prefix = `exiting beacuse of: `
+      const message = e.message ? prefix + e.message : JSON.stringify(e) ? prefix + JSON.stringify(e) : prefix + e
+      logger ? logger.error(message) : console.log(message)
+      process.exit(-1);
+  }
+
   
-  const logger = createLogger(cfg.logLevel);
-  
-  const server = _startHttpServer(cfg.port)
-
-  const promClient = new Prometheus(logger);
-  promClient.injectMetricsRoute(server)
-  promClient.startCollection()
-
-  const subscriber = new SubscriberFactory(cfg,logger).makeSubscriber()
-  await subscriber.start();
-
-  const wsMC = new WsMessageCenter(cfg,subscriber,logger)
-  _setSubscriberHandlers(subscriber, wsMC)
-  wsMC.initServer()
 }

@@ -182,3 +182,7 @@ export const extractRegistrationEntry = (key: StorageKey, exposure: Option<Regis
     info: info
   }
 }
+
+export const delay = (ms: number): Promise<void> =>{
+  return new Promise( resolve => setTimeout(resolve, ms) );
+}
