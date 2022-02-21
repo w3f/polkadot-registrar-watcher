@@ -9,7 +9,7 @@ import { Option } from '@polkadot/types'
 import fs from 'fs'
 import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
-import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isClaimChallengeCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent, buildJudgementGivenAck, extractRegistrationEntry, isDataPresent, isJudgementsFieldDisplayNamesCompliant } from "../utils";
+import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isClaimChallengeCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent, buildJudgementGivenAck, extractRegistrationEntry, isDataPresent, isJudgementsFieldDisplayNamesCompliant, delay } from "../utils";
 import { ISubscriber } from './ISubscriber'
 
 export class Subscriber implements ISubscriber {
@@ -38,12 +38,7 @@ export class Subscriber implements ISubscriber {
 
     public start = async (): Promise<void> => {
         
-        try {
-          await this._initAPI();
-        } catch (error) {
-          this.logger.error("initAPI error... exiting: "+JSON.stringify(error))
-          process.exit(1)
-        }
+        await this._initAPI();
 
         this._initKey()
         await this._initInstanceVariables();
@@ -54,27 +49,24 @@ export class Subscriber implements ISubscriber {
     }
 
     private _initAPI = async (): Promise<void> =>{
-        const provider = new WsProvider(this.endpoint);
-
-        this.api = new ApiPromise({provider})
-        if(this.api){
-          this.api.on("error", error => {
-            if( error.toString().includes("FATAL") || JSON.stringify(error).includes("FATAL") ){
-              this.logger.error("The API had a FATAL error... exiting!")
-              process.exit(1)
-            }
-          })
-        }
-        await this.api.isReadyOrError;
-
-        this.chain = await this.api.rpc.system.chain();
-        const [nodeName, nodeVersion] = await Promise.all([
-            this.api.rpc.system.name(),
-            this.api.rpc.system.version()
-        ]);
-        this.logger.info(
-            `You are connected to chain ${this.chain} using ${nodeName} v${nodeVersion}`
-        );
+      const endpoints = [this.endpoint]
+      const provider = new WsProvider(endpoints);
+      this.api = await ApiPromise.create({provider,throwOnConnect:true,throwOnUnknown:true})
+      this.api.on('disconnected', async () => { 
+        await delay(120000); //2 minute timeout
+        if(!this.api.isConnected) 
+          this.logger.error("Impossible to reconnect... exiting...")
+          process.exit(-1);
+      })
+      
+      this.chain = await this.api.rpc.system.chain();
+      const [nodeName, nodeVersion] = await Promise.all([
+          this.api.rpc.system.name(),
+          this.api.rpc.system.version()
+      ]);
+      this.logger.info(
+          `You are connected to chain ${this.chain} using ${nodeName} v${nodeVersion}`
+      );
     }
 
     private _initKey = (): void =>{
@@ -236,11 +228,11 @@ export class Subscriber implements ISubscriber {
 
     private _performNewChallengeAttempt = async (accountId: string): Promise<void> =>{
       const identity = await this._getIdentity(accountId)
-      const judgements = identity.unwrap().judgements
-      const info: IdentityInfo = identity.unwrap().info 
+      const judgements = identity.unwrapOrDefault().judgements
+      const info: IdentityInfo = identity.unwrapOrDefault().info 
       this.logger.debug(info.toString())
       this.logger.debug(judgements.toString())
-      this.logger.debug(identity.unwrap().toString())
+      this.logger.debug(identity.unwrapOrDefault().toString())
 
       if( identity.isEmpty ) {
         this.logger.info(`${accountId} has no active identity claims`)
