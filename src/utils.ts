@@ -10,7 +10,7 @@ export const initPersistenceDir = (dir: string): void =>{
 }
 
 export const isDataPresent = (data: Data): boolean => {
-  return !data.isNull && !data.isEmpty && !data.isNone
+  return !data == null && !data.isEmpty && !data.isNone
 }
 
 export const buildWsChallengeRequestData = (accountId: string, info: IdentityInfo): WsChallengeRequestData => {
