@@ -18,7 +18,7 @@
     "start": "node ./dist/index.js start"
   },
   "dependencies": {
-    "@polkadot/api": "^9.2.2",
+    "@polkadot/api": "^9.3.3",
     "@types/ws": "^7.2.7",
     "@w3f/config": "^0.1.1",
     "@w3f/logger": "^0.4.3",
