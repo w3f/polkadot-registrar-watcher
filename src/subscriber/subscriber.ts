@@ -297,8 +297,15 @@ export class Subscriber implements ISubscriber {
     }
 
     protected _triggerExtrinsicProvideJudgement = async (target: string, judgement: {Reasonable: boolean} | {Erroneous: boolean} ): Promise<void> =>{      
-      const extrinsic = this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement)
-      const txHash = await extrinsic.signAndSend(this.registrarAccount)
+      // Fetch the full identity from chain. Unwrapping on a `None` value would
+      // indicate a bug since the target is checked in
+      // `handleTriggerExtrinsicJudgement`.
+      const identity = (await this._getIdentity(target)).unwrap();
+      const _infoHash = identity.info.hash;
+
+      // TODO: Add infoHash once `api.tx.identity.provideJudgement` is updated.
+      const extrinsic = this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement);
+      const txHash = await extrinsic.signAndSend(this.registrarAccount);
       this.logger.info(`Judgement Submitted with hash ${txHash}`);
     }
 
