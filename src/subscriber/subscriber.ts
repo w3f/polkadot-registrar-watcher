@@ -272,10 +272,10 @@ export class Subscriber implements ISubscriber {
       try {
 
         if(judgementResult == JudgementResult[JudgementResult.erroneous] ){
-          await this.triggerExtrinsicErroneous(target)
+          await this.triggerExtrinsicErroneous(target, verified)
         }
         else if(judgementResult == JudgementResult[JudgementResult.reasonable] ){
-          await this.triggerExtrinsicReasonable(target)
+          await this.triggerExtrinsicReasonable(target, verified)
         }
 
         // the transaction has been successfully transmitted
@@ -288,20 +288,59 @@ export class Subscriber implements ISubscriber {
       
     }
 
-    public triggerExtrinsicReasonable = async (target: string): Promise<void> => {
-      await this._triggerExtrinsicProvideJudgement(target,{Reasonable: true})
+    public triggerExtrinsicReasonable = async (target: string, verified: Array<WsVerifiedField>): Promise<void> => {
+      await this._triggerExtrinsicProvideJudgement(target,{Reasonable: true}, verified)
     }
 
-    public triggerExtrinsicErroneous = async (target: string): Promise<void> =>{
-      await this._triggerExtrinsicProvideJudgement(target,{Erroneous: true})
+    public triggerExtrinsicErroneous = async (target: string, verified: Array<WsVerifiedField>): Promise<void> =>{
+      await this._triggerExtrinsicProvideJudgement(target,{Erroneous: true}, verified)
     }
 
-    protected _triggerExtrinsicProvideJudgement = async (target: string, judgement: {Reasonable: boolean} | {Erroneous: boolean} ): Promise<void> =>{      
+    protected _triggerExtrinsicProvideJudgement = async (target: string, judgement: {Reasonable: boolean} | {Erroneous: boolean} , verified: Array<WsVerifiedField>): Promise<void> =>{
       // Fetch the full identity from chain. Unwrapping on a `None` value would
       // indicate a bug since the target is checked in
       // `handleTriggerExtrinsicJudgement`.
-      const identity = (await this._getIdentity(target)).unwrap();
-      const _infoHash = identity.info.hash;
+      const info = (await this._getIdentity(target)).unwrap().info;
+
+      // Check if the verified values match the on-chain identity.
+      for (const field of verified) {
+        switch (field.accountTy) {
+          case "legal_name":
+            if (field.value != info.legal.toHuman()) {
+              throw new Error("Verified legal name does not mache on-chain value");
+            }
+            break;
+          case "display_name":
+            if (field.value != info.display.toHuman()) {
+              throw new Error("Verified display name does not mache on-chain value");
+            }
+            break;
+          case "email":
+            if (field.value != info.email.toHuman()) {
+              throw new Error("Verified email does not mache on-chain value");
+            }
+            break;
+          case "twitter":
+            if (field.value != info.twitter.toHuman()) {
+              throw new Error("Verified twitter does not mache on-chain value");
+            }
+            break;
+          case "matrix":
+            if (field.value != info.riot.toHuman()) {
+              throw new Error("Verified matrix does not mache on-chain value");
+            }
+            break;
+          case "web":
+            if (field.value != info.web.toHuman()) {
+              throw new Error("Verified web does not mache on-chain value");
+            }
+            break;
+          default:
+            throw new Error(`Verified unsupported entries: ${field.accountTy}`);
+        }
+      }
+
+      const _infoHash = info.hash;
 
       // TODO: Add infoHash once `api.tx.identity.provideJudgement` is updated.
       const extrinsic = this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement);
