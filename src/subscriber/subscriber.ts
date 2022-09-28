@@ -3,7 +3,7 @@ import { SessionIndex, Registration, IdentityInfo, Event } from '@polkadot/types
 import { Logger } from '@w3f/logger';
 import { Text } from '@polkadot/types/primitive';
 import {
-    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck, WsDisplayNameResponse
+    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck, WsDisplayNameResponse, WsVerifiedField
 } from '../types';
 import { Option } from '@polkadot/types'
 import fs from 'fs'
@@ -258,7 +258,7 @@ export class Subscriber implements ISubscriber {
       return await this.api.query.identity.identityOf(accountId)
     }
 
-    public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<boolean> => {
+    public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string, verified: Array<WsVerifiedField>): Promise<boolean> => {
 
       if( ! await this._isAccountIdWaitingOurJudgement(target) ){
         this.logger.info(`the account id ${target} is not present in the pending judgment request set for our registrar...`)

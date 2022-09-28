@@ -48,7 +48,7 @@ export class WsMessageCenter {
 
       if(data['event'] == 'judgementResult'){
         const judgementResult: WsJudgementResult = data['data']
-        await this.subscriber.handleTriggerExtrinsicJudgement(judgementResult.judgement,judgementResult.address)
+        await this.subscriber.handleTriggerExtrinsicJudgement(judgementResult.judgement,judgementResult.address, judgementResult.verified)
       }
 
       if(data['event'] == 'pendingJudgementsRequest'){

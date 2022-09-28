@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
 
-import { WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck, WsDisplayNameResponse } from "../types";
+import { WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck, WsDisplayNameResponse, WsVerifiedField } from "../types";
 
 export interface ISubscriber{
   start(): Promise<void>;
@@ -9,5 +9,5 @@ export interface ISubscriber{
   setJudgementGivenHandler(handler: (request: WsAck) => void ): void;
   getAllOurPendingWsChallengeRequests(): Promise<WsPendingChallengesResponse>;
   getAllDisplayNames(): Promise<WsDisplayNameResponse>;
-  handleTriggerExtrinsicJudgement(result: string,address: string): Promise<boolean>;
+  handleTriggerExtrinsicJudgement(result: string, address: string, verified: Array<WsVerifiedField>): Promise<boolean>;
 }
