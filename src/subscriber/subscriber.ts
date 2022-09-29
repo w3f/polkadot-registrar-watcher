@@ -269,33 +269,39 @@ export class Subscriber implements ISubscriber {
       for (const field of verified) {
         switch (field.accountTy) {
           case "legal_name":
-            if (field.value != info.legal.toString()) {
-              throw new Error(`Verified legal name does not mache on-chain value. Expected ${field.value}, found: ${info.legal.toString()}`);
+            const chainLegalName = Buffer.from(info.legal.toString()).toString('utf8');
+            if (field.value != chainLegalName) {
+              throw new Error(`Verified legal name does not mache on-chain value. Expected ${field.value}, found: ${chainLegalName}`);
             }
             break;
           case "display_name":
-            if (field.value != info.display.toString()) {
-              throw new Error(`Verified display name does not mache on-chain value. Expected ${field.value}, found: ${info.display.toString()}`);
+            const chainDisplayName = Buffer.from(info.display.toString()).toString('utf8')
+            if (field.value != chainDisplayName) {
+              throw new Error(`Verified display name does not mache on-chain value. Expected ${field.value}, found: ${chainDisplayName}`);
             }
             break;
           case "email":
-            if (field.value != info.email.toString()) {
-              throw new Error(`Verified email does not mache on-chain value. Expected ${field.value}, found: ${info.email.toString()}`);
+            const chainEmail = Buffer.from(info.email.toString()).toString('utf8')
+            if (field.value != chainEmail) {
+              throw new Error(`Verified email does not mache on-chain value. Expected ${field.value}, found: ${chainEmail}`);
             }
             break;
           case "twitter":
-            if (field.value != info.twitter.toString()) {
-              throw new Error(`Verified twitter does not mache on-chain value. Expected ${field.value}, found: ${info.twitter.toString()}`);
+            const chainTwitter = Buffer.from(info.twitter.toString()).toString('utf8')
+            if (field.value != chainTwitter) {
+              throw new Error(`Verified twitter does not mache on-chain value. Expected ${field.value}, found: ${chainTwitter}`);
             }
             break;
           case "matrix":
-            if (field.value != info.riot.toString()) {
-              throw new Error(`Verified matrix does not mache on-chain value. Expected ${field.value}, found: ${info.riot.toString()}`);
+            const chainMatrix = Buffer.from(info.riot.toString()).toString('utf8')
+            if (field.value != chainMatrix) {
+              throw new Error(`Verified matrix does not mache on-chain value. Expected ${field.value}, found: ${chainMatrix}`);
             }
             break;
           case "web":
-            if (field.value != info.web.toString()) {
-              throw new Error(`Verified web does not mache on-chain value. Expected ${field.value}, found: ${info.web.toString()}`);
+            const chainWeb = Buffer.from(info.web.toString()).toString('utf8')
+            if (field.value != chainWeb) {
+              throw new Error(`Verified web does not mache on-chain value. Expected ${field.value}, found: ${chainWeb}`);
             }
             break;
           default:
