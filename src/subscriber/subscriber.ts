@@ -269,33 +269,33 @@ export class Subscriber implements ISubscriber {
       for (const field of verified) {
         switch (field.accountTy) {
           case "legal_name":
-            if (field.value != info.legal.toHuman()) {
-              throw new Error(`Verified legal name does not mache on-chain value. Expected ${field.value}, found: ${info.legal.toHuman()}`);
+            if (field.value != info.legal.toString()) {
+              throw new Error(`Verified legal name does not mache on-chain value. Expected ${field.value}, found: ${info.legal.toString()}`);
             }
             break;
           case "display_name":
-            if (field.value != info.display.toHuman()) {
-              throw new Error(`Verified display name does not mache on-chain value. Expected ${field.value}, found: ${info.display.toHuman()}`);
+            if (field.value != info.display.toString()) {
+              throw new Error(`Verified display name does not mache on-chain value. Expected ${field.value}, found: ${info.display.toString()}`);
             }
             break;
           case "email":
-            if (field.value != info.email.toHuman()) {
-              throw new Error(`Verified email does not mache on-chain value. Expected ${field.value}, found: ${info.email.toHuman()}`);
+            if (field.value != info.email.toString()) {
+              throw new Error(`Verified email does not mache on-chain value. Expected ${field.value}, found: ${info.email.toString()}`);
             }
             break;
           case "twitter":
-            if (field.value != info.twitter.toHuman()) {
-              throw new Error(`Verified twitter does not mache on-chain value. Expected ${field.value}, found: ${info.twitter.toHuman()}`);
+            if (field.value != info.twitter.toString()) {
+              throw new Error(`Verified twitter does not mache on-chain value. Expected ${field.value}, found: ${info.twitter.toString()}`);
             }
             break;
           case "matrix":
-            if (field.value != info.riot.toHuman()) {
-              throw new Error(`Verified matrix does not mache on-chain value. Expected ${field.value}, found: ${info.riot.toHuman()}`);
+            if (field.value != info.riot.toString()) {
+              throw new Error(`Verified matrix does not mache on-chain value. Expected ${field.value}, found: ${info.riot.toString()}`);
             }
             break;
           case "web":
-            if (field.value != info.web.toHuman()) {
-              throw new Error(`Verified web does not mache on-chain value. Expected ${field.value}, found: ${info.web.toHuman()}`);
+            if (field.value != info.web.toString()) {
+              throw new Error(`Verified web does not mache on-chain value. Expected ${field.value}, found: ${info.web.toString()}`);
             }
             break;
           default:
