@@ -265,6 +265,9 @@ export class Subscriber implements ISubscriber {
       // `handleTriggerExtrinsicJudgement`.
       const info = (await this._getIdentity(target)).unwrap().info;
 
+      // TODO: Remove this and make a on-chain field check. The code below does not work yet.
+      return info.hash;
+
       // Check if the verified values match the on-chain identity.
       for (const field of verified) {
         switch (field.accountTy) {
