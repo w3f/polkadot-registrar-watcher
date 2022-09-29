@@ -3,7 +3,7 @@ import { SessionIndex, Registration, IdentityInfo, Event } from '@polkadot/types
 import { Logger } from '@w3f/logger';
 import { Text } from '@polkadot/types/primitive';
 import {
-    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck, WsDisplayNameResponse
+    InputConfig, JudgementResult, WsChallengeRequest, WsChallengeUnrequest, WsPendingChallengesResponse, WsAck, WsDisplayNameResponse, WsVerifiedField
 } from '../types';
 import { Option } from '@polkadot/types'
 import fs from 'fs'
@@ -11,6 +11,7 @@ import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
 import {Keyring} from '@polkadot/keyring'
 import { buildWsChallengeRequest, buildWsChallengeUnrequest, isJudgementGivenEvent, isJudgementUnrequested, isClaimChallengeCompliant, isJudgementRequestedEvent, isIdentityClearedEvent, extractJudgementInfoFromEvent, extractIdentityInfoFromEvent, buildWsChallengeRequestData, isIdentitySetEvent, buildJudgementGivenAck, extractRegistrationEntry, isDataPresent, isJudgementsFieldDisplayNamesCompliant, delay } from "../utils";
 import { ISubscriber } from './ISubscriber'
+import { IU8a } from '@polkadot/types-codec/types';
 
 export class Subscriber implements ISubscriber {
     private chain: Text;
@@ -258,7 +259,54 @@ export class Subscriber implements ISubscriber {
       return await this.api.query.identity.identityOf(accountId)
     }
 
-    public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string): Promise<boolean> => {
+    private _verifyOnchainMatch = async (target: string, verified: Array<WsVerifiedField>): Promise<IU8a> => {
+      // Fetch the full identity from chain. Unwrapping on a `None` value would
+      // indicate a bug since the target is checked in
+      // `handleTriggerExtrinsicJudgement`.
+      const info = (await this._getIdentity(target)).unwrap().info;
+
+      // Check if the verified values match the on-chain identity.
+      for (const field of verified) {
+        switch (field.accountTy) {
+          case "legal_name":
+            if (field.value != info.legal.toHuman()) {
+              throw new Error("Verified legal name does not mache on-chain value");
+            }
+            break;
+          case "display_name":
+            if (field.value != info.display.toHuman()) {
+              throw new Error("Verified display name does not mache on-chain value");
+            }
+            break;
+          case "email":
+            if (field.value != info.email.toHuman()) {
+              throw new Error("Verified email does not mache on-chain value");
+            }
+            break;
+          case "twitter":
+            if (field.value != info.twitter.toHuman()) {
+              throw new Error("Verified twitter does not mache on-chain value");
+            }
+            break;
+          case "matrix":
+            if (field.value != info.riot.toHuman()) {
+              throw new Error("Verified matrix does not mache on-chain value");
+            }
+            break;
+          case "web":
+            if (field.value != info.web.toHuman()) {
+              throw new Error("Verified web does not mache on-chain value");
+            }
+            break;
+          default:
+            throw new Error(`Verified unsupported entries: ${field.accountTy}`);
+        }
+      }
+
+      return info.hash;
+    }
+
+    public handleTriggerExtrinsicJudgement = async (judgementResult: string, target: string, verified: Array<WsVerifiedField>): Promise<boolean> => {
 
       if( ! await this._isAccountIdWaitingOurJudgement(target) ){
         this.logger.info(`the account id ${target} is not present in the pending judgment request set for our registrar...`)
@@ -272,10 +320,12 @@ export class Subscriber implements ISubscriber {
       try {
 
         if(judgementResult == JudgementResult[JudgementResult.erroneous] ){
-          await this.triggerExtrinsicErroneous(target)
+          const identityHash = await this._verifyOnchainMatch(target,verified)
+          await this.triggerExtrinsicErroneous(target, identityHash)
         }
         else if(judgementResult == JudgementResult[JudgementResult.reasonable] ){
-          await this.triggerExtrinsicReasonable(target)
+          const identityHash = await this._verifyOnchainMatch(target,verified)
+          await this.triggerExtrinsicReasonable(target, identityHash)
         }
 
         // the transaction has been successfully transmitted
@@ -288,17 +338,17 @@ export class Subscriber implements ISubscriber {
       
     }
 
-    public triggerExtrinsicReasonable = async (target: string): Promise<void> => {
-      await this._triggerExtrinsicProvideJudgement(target,{Reasonable: true})
+    public triggerExtrinsicReasonable = async (target: string, identityHash: IU8a): Promise<void> => {
+      await this._triggerExtrinsicProvideJudgement(target,{Reasonable: true}, identityHash)
     }
 
-    public triggerExtrinsicErroneous = async (target: string): Promise<void> =>{
-      await this._triggerExtrinsicProvideJudgement(target,{Erroneous: true})
+    public triggerExtrinsicErroneous = async (target: string, identityHash: IU8a): Promise<void> =>{
+      await this._triggerExtrinsicProvideJudgement(target,{Erroneous: true}, identityHash)
     }
 
-    protected _triggerExtrinsicProvideJudgement = async (target: string, judgement: {Reasonable: boolean} | {Erroneous: boolean} ): Promise<void> =>{      
-      const extrinsic = this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement)
-      const txHash = await extrinsic.signAndSend(this.registrarAccount)
+    protected _triggerExtrinsicProvideJudgement = async (target: string, judgement: {Reasonable: boolean} | {Erroneous: boolean} , identityHash: IU8a): Promise<void> =>{
+      const extrinsic = this.api.tx.identity.provideJudgement(this.registrarIndex,target,judgement, identityHash);
+      const txHash = await extrinsic.signAndSend(this.registrarAccount);
       this.logger.info(`Judgement Submitted with hash ${txHash}`);
     }
 

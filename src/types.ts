@@ -95,6 +95,12 @@ export interface WsChallengeResponse {
 export interface WsJudgementResult{
   address: string;
   judgement: string;
+  verified: Array<WsVerifiedField>;
+}
+
+export interface WsVerifiedField {
+  accountTy: string;
+  value: string;
 }
 
 export interface WsChallengeUnrequest {
