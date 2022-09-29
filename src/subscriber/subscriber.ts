@@ -268,42 +268,48 @@ export class Subscriber implements ISubscriber {
       // Check if the verified values match the on-chain identity.
       for (const field of verified) {
         switch (field.accountTy) {
-          case "legal_name":
+          case "legal_name": {
             const chainLegalName = Buffer.from(info.legal.toString()).toString('utf8');
             if (field.value != chainLegalName) {
               throw new Error(`Verified legal name does not mache on-chain value. Expected ${field.value}, found: ${chainLegalName}`);
             }
             break;
-          case "display_name":
-            const chainDisplayName = Buffer.from(info.display.toString()).toString('utf8')
+          }
+          case "display_name": {
+            const chainDisplayName = Buffer.from(info.display.toString()).toString('utf8');
             if (field.value != chainDisplayName) {
               throw new Error(`Verified display name does not mache on-chain value. Expected ${field.value}, found: ${chainDisplayName}`);
             }
             break;
-          case "email":
-            const chainEmail = Buffer.from(info.email.toString()).toString('utf8')
+          }
+          case "email": {
+            const chainEmail = Buffer.from(info.email.toString()).toString('utf8');
             if (field.value != chainEmail) {
               throw new Error(`Verified email does not mache on-chain value. Expected ${field.value}, found: ${chainEmail}`);
             }
             break;
-          case "twitter":
-            const chainTwitter = Buffer.from(info.twitter.toString()).toString('utf8')
+          }
+          case "twitter": {
+            const chainTwitter = Buffer.from(info.twitter.toString()).toString('utf8');
             if (field.value != chainTwitter) {
               throw new Error(`Verified twitter does not mache on-chain value. Expected ${field.value}, found: ${chainTwitter}`);
             }
             break;
-          case "matrix":
-            const chainMatrix = Buffer.from(info.riot.toString()).toString('utf8')
+          }
+          case "matrix": {
+            const chainMatrix = Buffer.from(info.riot.toString()).toString('utf8');
             if (field.value != chainMatrix) {
               throw new Error(`Verified matrix does not mache on-chain value. Expected ${field.value}, found: ${chainMatrix}`);
             }
             break;
-          case "web":
-            const chainWeb = Buffer.from(info.web.toString()).toString('utf8')
+          }
+          case "web": {
+            const chainWeb = Buffer.from(info.web.toString()).toString('utf8');
             if (field.value != chainWeb) {
               throw new Error(`Verified web does not mache on-chain value. Expected ${field.value}, found: ${chainWeb}`);
             }
             break;
+          }
           default:
             throw new Error(`Verified unsupported entries: ${field.accountTy}`);
         }
