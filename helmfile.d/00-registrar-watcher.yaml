@@ -21,7 +21,7 @@ releases:
 - name: kusama-registrar-watcher
   namespace: registrar-v2 
   chart: w3f/polkadot-registrar-watcher
-  version: v0.3.33
+  version: v0.4.7
   values:
   - ./config/registrar-watcher-values.yaml.gotmpl
   - ./config/kusama/registrar-watcher-values.yaml.gotmpl  
@@ -29,7 +29,7 @@ releases:
 - name: polkadot-registrar-watcher
   namespace: registrar-v2 
   chart: w3f/polkadot-registrar-watcher
-  version: v0.3.33
+  version: v0.4.7
   values:
   - ./config/registrar-watcher-values.yaml.gotmpl
   - ./config/polkadot/registrar-watcher-values.yaml.gotmpl  
