@@ -22,7 +22,7 @@ spec:
       containers:
       - name: {{ .Release.Name }}
         image: {{ .Values.image.repo }}:{{ .Values.image.tag | default .Chart.AppVersion }}
-        imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
+        imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
         args:
         - -c
         - /app/config/main.yaml
