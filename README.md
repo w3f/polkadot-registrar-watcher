@@ -2,6 +2,8 @@
 
 # Polkadot-Registrar-Watcher
 
+❗❗❗ THIS PROJECT IS DECOMMISSIONED AND NO LONGER UPDATED ❗❗❗
+
 This application is the **Watcher** module of the **Polkadot-Registrar** application.    
 You can find the **Challenger** module here: https://github.com/w3f/polkadot-registrar-challenger  
 Watcher and Challenger modules together compose the **Polkadot-Registrar** application.
